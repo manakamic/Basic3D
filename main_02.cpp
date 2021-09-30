@@ -1,3 +1,8 @@
+//!
+//! @file main_02.cpp
+//!
+//! @brief 3D モデルを読み込み、最低限の表示を行うサンプル(+モデル回転)
+//!
 #include "DxLib.h"
 
 namespace {
@@ -6,6 +11,7 @@ namespace {
     constexpr auto SCREEN_HEIGHT = 720;
     constexpr auto SCREEN_DEPTH = 32;
     constexpr auto MODEL_FILE = _T("model/Formula1.mv1");
+    constexpr auto DEGREE_TO_RADIAN = DX_PI_F / 180.0f;
 }
 
 int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
@@ -58,7 +64,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
         model_y_angle += 0.5f; // 0.5 度づつ加算
 
         // 度 -> ラジアンに変換
-        auto model_y_radian = model_y_angle * DX_PI_F / 180.0f;
+        auto model_y_radian = model_y_angle * DEGREE_TO_RADIAN;
 
         // XYZ それぞれの軸の回転値をラジアンで指定
         VECTOR model_xyz_rotate = VGet(0.0f, model_y_radian, 0.0f);

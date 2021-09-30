@@ -1,3 +1,8 @@
+//!
+//! @file main_00.cpp
+//!
+//! @brief 3D モデルを読み込み、最低限の表示を行うサンプル
+//!
 #include "DxLib.h"
 
 namespace {
