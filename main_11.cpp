@@ -2,12 +2,14 @@
 //! @file main_11.cpp
 //!
 //! @brief 3D モデルを読み込み、最低限の表示を行うサンプル(+カメラ移動+カメラ行列の計算+プロジェクション行列)
+//!        main_10.cpp の vector4 / matrix44 class 版
 //!
 #include "DxLib.h"
 #include "vector4.h"
 #include "matrix44.h"
 #include "utility.h"
 #include <cmath>
+#include <utility>
 
 namespace {
     constexpr auto WINDOW_TITLE = "Basic 3D";
@@ -16,15 +18,15 @@ namespace {
     constexpr auto SCREEN_DEPTH = 32;
     constexpr auto MODEL_FILE = _T("model/Formula1.mv1");
 
-    VECTOR ToDX(math::vector4& vector) {
-        return VGet(static_cast<float>(vector.get_x()), static_cast<float>(vector.get_y()), static_cast<float>(vector.get_z()));
+    VECTOR&& ToDX(math::vector4& vector) {
+        return std::move(VGet(static_cast<float>(vector.get_x()), static_cast<float>(vector.get_y()), static_cast<float>(vector.get_z())));
     }
 
-    math::vector4 ToMath(VECTOR& vector) {
-        return math::vector4(static_cast<double>(vector.x), static_cast<double>(vector.y), static_cast<double>(vector.z));
+    math::vector4&& ToMath(VECTOR& vector) {
+        return std::move(math::vector4(static_cast<double>(vector.x), static_cast<double>(vector.y), static_cast<double>(vector.z)));
     }
 
-    MATRIX ToDX(math::matrix44 matrix) {
+    MATRIX&& ToDX(math::matrix44& matrix) {
         MATRIX ret;
 
         for (auto i = 0; i < math::row_max; ++i) {
@@ -33,10 +35,10 @@ namespace {
             }
         }
 
-        return ret;
+        return std::move(ret);
     }
 
-    math::matrix44 ToMath(MATRIX& matrix) {
+    math::matrix44&& ToMath(MATRIX& matrix) {
         math::matrix44 ret;
 
         for (auto i = 0; i < math::row_max; ++i) {
@@ -45,12 +47,12 @@ namespace {
             }
         }
 
-        return ret;
+        return std::move(ret);
     }
 }
 
-math::matrix44 GetCameraViewMatrix(math::vector4& cameraPosition, math::vector4& cameraTarget, math::vector4& cameraUp);
-math::matrix44 GetCameraProjectionMatrix(double cameraNear, double cameraFar, double fov);
+math::matrix44&& GetCameraViewMatrix(math::vector4& cameraPosition, math::vector4& cameraTarget, math::vector4& cameraUp);
+math::matrix44&& GetCameraProjectionMatrix(double cameraNear, double cameraFar, double fov);
 
 int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
     auto window_mode = FALSE;
@@ -84,9 +86,9 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
     auto light_handle = CreateDirLightHandle(light_dir);
 
     // カメラ情報
-    math::vector4 camera_position = math::vector4(-400.0, 250.0, -150.0);
-    math::vector4 camera_target = math::vector4(0.0, 0.0, 0.0);
-    math::vector4 camera_up = math::vector4(0.0, 1.0, 0.0);
+    auto camera_position = math::vector4(-400.0, 250.0, -150.0);
+    auto camera_target = math::vector4(0.0, 0.0, 0.0);
+    auto camera_up = math::vector4(0.0, 1.0, 0.0);
 
     // パースペクティブ処理に必要な情報
     auto camera_near = 1.0;
@@ -94,6 +96,9 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
     auto fov = math::utility::degree_to_radian(60.0);
 
     SetDrawScreen(DX_SCREEN_BACK);
+
+    auto string_color = GetColor(255, 255, 255);
+    auto string_camera_position = _T("Camera Position : X[%.1lf], Y[%.1lf], Z[%.1lf]");
 
     while (ProcessMessage() != -1) {
         if (1 == CheckHitKey(KEY_INPUT_ESCAPE)) {
@@ -113,18 +118,20 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
         // カメラ情報をセット
         //SetCameraPositionAndTargetAndUpVec(camera_position, camera_target, camera_up);
-        math::matrix44 camera_matrix = GetCameraViewMatrix(camera_position, camera_target, camera_up);
+        auto camera_matrix = GetCameraViewMatrix(camera_position, camera_target, camera_up);
         SetCameraViewMatrix(ToDX(camera_matrix));
 
         //SetCameraNearFar(camera_near, camera_far);
         //SetupCamera_Perspective(fov);
-        math::matrix44 projection_matrix = GetCameraProjectionMatrix(camera_near, camera_far, fov);
+        auto projection_matrix = GetCameraProjectionMatrix(camera_near, camera_far, fov);
         SetupCamera_ProjectionMatrix(ToDX(projection_matrix));
 
         ClearDrawScreen();
 
         // 3D モデルの表示
         MV1DrawModel(handle);
+
+        DrawFormatString(0, 0, string_color, string_camera_position, camera_position.get_x(), camera_position.get_y(), camera_position.get_z());
 
         ScreenFlip();
     }
@@ -140,7 +147,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
     return 0;
 }
 
-math::matrix44 GetCameraViewMatrix(math::vector4& cameraPosition, math::vector4& cameraTarget, math::vector4& cameraUp) {
+math::matrix44&& GetCameraViewMatrix(math::vector4& cameraPosition, math::vector4& cameraTarget, math::vector4& cameraUp) {
     //SetCameraPositionAndTargetAndUpVec(camera_position, camera_target, camera_up);
     //MATRIX camera_matrix = GetCameraViewMatrix();
     // ↑ 上記と同じ MATRIX の内容を計算する
@@ -148,10 +155,10 @@ math::matrix44 GetCameraViewMatrix(math::vector4& cameraPosition, math::vector4&
 
     camera_matrix.look_at(cameraPosition, cameraTarget, cameraUp);
 
-    return camera_matrix;
+    return std::move(camera_matrix);
 }
 
-math::matrix44 GetCameraProjectionMatrix(double cameraNear, double cameraFar, double fov) {
+math::matrix44&& GetCameraProjectionMatrix(double cameraNear, double cameraFar, double fov) {
     //SetCameraNearFar(camera_near, camera_far);
     //SetupCamera_Perspective(fov);
     //MATRIX projection_matrix = GetCameraProjectionMatrix();
@@ -161,5 +168,5 @@ math::matrix44 GetCameraProjectionMatrix(double cameraNear, double cameraFar, do
 
     projection_matrix.perspective(fov, aspect, cameraNear, cameraFar);
 
-    return projection_matrix;
+    return std::move(projection_matrix);
 }
