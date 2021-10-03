@@ -61,6 +61,9 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
     SetDrawScreen(DX_SCREEN_BACK);
 
+    auto string_color = GetColor(255, 255, 255);
+    auto string_camera_position = _T("Camera Position : X[%.1f], Y[%.1f], Z[%.1f]");
+
     while (ProcessMessage() != -1) {
         if (1 == CheckHitKey(KEY_INPUT_ESCAPE)) {
             break;
@@ -91,6 +94,8 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
         // 3D ƒ‚ƒfƒ‹‚Ì•\Ž¦
         MV1DrawModel(handle);
+
+        DrawFormatString(0, 0, string_color, string_camera_position, camera_position.x, camera_position.y, camera_position.z);
 
         ScreenFlip();
     }
