@@ -32,11 +32,9 @@ namespace math {
         auto axis_z = target - position;
 
         axis_z.normalized();
+        up.normalize();
 
         auto axis_x = up.cross(axis_z);
-
-        axis_x.normalized();
-
         auto axis_y = axis_z.cross(axis_x);
 
         row_column[0][0] = axis_x.get_x();
@@ -148,7 +146,7 @@ namespace math {
             row_column[2][2] =  cos;
         }
         else {
-            matrix_array array{ {{0, 0, 0, 0}, {0, cos, sin, 0}, {0, -sin, cos, 0}, {0, 0, 0, 0}} };
+            matrix_array array{ {{1, 0, 0, 0}, {0, cos, sin, 0}, {0, -sin, cos, 0}, {0, 0, 0, 1}} };
             matrix44 rot_x(array);
 
             *this = *this * rot_x;
@@ -169,7 +167,7 @@ namespace math {
             row_column[2][2] =  cos;
         }
         else {
-            matrix_array array{ {{cos, 0, -sin, 0}, {0, 0, 0, 0}, {sin, 0, cos, 0}, {0, 0, 0, 0}} };
+            matrix_array array{ {{cos, 0, -sin, 0}, {0, 1, 0, 0}, {sin, 0, cos, 0}, {0, 0, 0, 1}} };
             matrix44 rot_y(array);
 
             *this = *this * rot_y;
@@ -190,7 +188,7 @@ namespace math {
             row_column[1][1] =  cos;
         }
         else {
-            matrix_array array{ {{cos, sin, 0, 0}, {-sin, cos, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}} };
+            matrix_array array{ {{cos, sin, 0, 0}, {-sin, cos, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}} };
             matrix44 rot_z(array);
 
             *this = *this * rot_z;
