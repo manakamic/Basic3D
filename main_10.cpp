@@ -15,7 +15,7 @@ namespace {
     constexpr auto DEGREE_TO_RADIAN = DX_PI_F / 180.0f;
 }
 
-MATRIX GetCameraViewMatrix(VECTOR cameraPosition, VECTOR cameraTarget, VECTOR cameraUp);
+MATRIX GetCameraViewMatrix(VECTOR& cameraPosition, VECTOR& cameraTarget, VECTOR& cameraUp);
 MATRIX GetCameraProjectionMatrix(float cameraNear, float cameraFar, float fov);
 
 int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
@@ -106,7 +106,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
     return 0;
 }
 
-MATRIX GetCameraViewMatrix(VECTOR cameraPosition, VECTOR cameraTarget, VECTOR cameraUp) {
+MATRIX GetCameraViewMatrix(VECTOR& cameraPosition, VECTOR& cameraTarget, VECTOR& cameraUp) {
     //SetCameraPositionAndTargetAndUpVec(camera_position, camera_target, camera_up);
     //MATRIX camera_matrix = GetCameraViewMatrix();
     // Å™ è„ãLÇ∆ìØÇ∂ MATRIX ÇÃì‡óeÇåvéZÇ∑ÇÈ
