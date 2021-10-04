@@ -30,12 +30,12 @@ namespace math {
     // –{—ˆ‚ÍƒJƒƒ‰‚É‘®‚·‚éˆ—‚¾‚ª•Ö‹XãÀ‘•‚·‚é
     void matrix44::look_at(const vector4& position, const vector4& target, const vector4& up) {
         auto axis_z = target - position;
-
-        axis_z.normalized();
-        up.normalize();
-
         auto axis_x = up.cross(axis_z);
         auto axis_y = axis_z.cross(axis_x);
+
+        axis_x.normalized();
+        axis_y.normalized();
+        axis_z.normalized();
 
         row_column[0][0] = axis_x.get_x();
         row_column[0][1] = axis_y.get_x();
