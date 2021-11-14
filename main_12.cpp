@@ -156,7 +156,7 @@ math::matrix44 GetCameraViewMatrix(math::vector4& cameraPosition, math::vector4&
 
     camera_matrix.look_at(cameraPosition, cameraTarget, cameraUp);
 
-    return std::move(camera_matrix);
+    return camera_matrix;
 }
 
 math::matrix44 GetCameraProjectionMatrix(double cameraNear, double cameraFar, double fov) {
@@ -169,5 +169,5 @@ math::matrix44 GetCameraProjectionMatrix(double cameraNear, double cameraFar, do
 
     projection_matrix.perspective(fov, aspect, cameraNear, cameraFar);
 
-    return std::move(projection_matrix);
+    return projection_matrix;
 }

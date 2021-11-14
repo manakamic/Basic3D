@@ -5,11 +5,11 @@
 #include <utility>
 
 VECTOR ToDX(math::vector4& vector) {
-    return std::move(VGet(static_cast<float>(vector.get_x()), static_cast<float>(vector.get_y()), static_cast<float>(vector.get_z())));
+    return VGet(static_cast<float>(vector.get_x()), static_cast<float>(vector.get_y()), static_cast<float>(vector.get_z()));
 }
 
 math::vector4 ToMath(VECTOR& vector) {
-    return std::move(math::vector4(static_cast<double>(vector.x), static_cast<double>(vector.y), static_cast<double>(vector.z)));
+    return math::vector4(static_cast<double>(vector.x), static_cast<double>(vector.y), static_cast<double>(vector.z));
 }
 
 MATRIX ToDX(math::matrix44& matrix) {
@@ -21,7 +21,7 @@ MATRIX ToDX(math::matrix44& matrix) {
         }
     }
 
-    return std::move(ret);
+    return ret;
 }
 
 math::matrix44 ToMath(MATRIX& matrix) {
@@ -33,5 +33,5 @@ math::matrix44 ToMath(MATRIX& matrix) {
         }
     }
 
-    return std::move(ret);
+    return ret;
 }
