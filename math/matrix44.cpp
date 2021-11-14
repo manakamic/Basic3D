@@ -188,7 +188,7 @@ namespace math {
             row_column[1][1] =  cos;
         }
         else {
-            matrix_array array{ {{cos, sin, 0, 0}, {-sin, cos, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}} };
+            matrix_array array{ {{cos, sin, 0, 0}, {-sin, cos, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}} };
             matrix44 rot_z(array);
 
             *this = *this * rot_z;
