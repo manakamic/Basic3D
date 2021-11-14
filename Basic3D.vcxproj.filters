@@ -19,6 +19,12 @@
     <Filter Include="ヘッダー ファイル\math">
       <UniqueIdentifier>{11dee174-f78d-44dc-a172-a733cb51e487}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\object">
+      <UniqueIdentifier>{118f0b71-a54e-40ec-b297-eea1c507fa5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\object">
+      <UniqueIdentifier>{f50354b9-8152-4549-b434-c33716ec0dfb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main_00.cpp">
@@ -72,6 +78,15 @@
     <ClCompile Include="dx_utility.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="object\model.cpp">
+      <Filter>ソース ファイル\object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\model_base.cpp">
+      <Filter>ソース ファイル\object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\player.cpp">
+      <Filter>ソース ファイル\object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix44.h">
@@ -85,6 +100,15 @@
     </ClInclude>
     <ClInclude Include="dx_utility.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="object\model.h">
+      <Filter>ヘッダー ファイル\object</Filter>
+    </ClInclude>
+    <ClInclude Include="object\model_base.h">
+      <Filter>ヘッダー ファイル\object</Filter>
+    </ClInclude>
+    <ClInclude Include="object\player.h">
+      <Filter>ヘッダー ファイル\object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
