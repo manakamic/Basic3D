@@ -13,7 +13,7 @@
 #include <utility>
 
 namespace {
-    constexpr auto WINDOW_TITLE = "Basic 3D";
+    constexpr auto WINDOW_TITLE = _T("Basic 3D");
     constexpr auto SCREEN_WIDTH = 1280;
     constexpr auto SCREEN_HEIGHT = 720;
     constexpr auto SCREEN_DEPTH = 32;
