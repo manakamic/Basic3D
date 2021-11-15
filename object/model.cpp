@@ -29,6 +29,7 @@ namespace mv1 {
         process_blend();
     }
 
+    // アニメーション ブレンド処理
     void model::process_blend() {
         if (-1 == main .index || -1 == blend.index) {
             return;
@@ -42,13 +43,14 @@ namespace mv1 {
 
         blend_count++;
 
+        // 指定のブレンドフレームが過ぎたら
         if (blend_count > blend_frame) {
-            detach_anim_info(main);
+            detach_anim_info(main); // main の方は破棄
 
-            main = blend;
-            main.play = base_frame;
+            main = blend;           // blend のアニメーションを main にする
+            main.play = base_frame; // ブレンド フレーム分進める
 
-            blend.reset();
+            blend.reset();          // main にコピーしたのでリセット
         }
     }
 
@@ -105,14 +107,16 @@ namespace mv1 {
     }
 
     void model::set_anim_time(anim_info& info) {
-        if (-1 != info.index) {
-            MV1SetAttachAnimTime(handle, info.attach, info.play);
+        if (-1 == info.index) {
+            return;
+        }
 
-            info.play += info.speed;
+        MV1SetAttachAnimTime(handle, info.attach, info.play);
 
-            if (info.play > info.total) {
-                info.play = info.loop ? 0.0f : info.total;
-            }
+        info.play += info.speed;
+
+        if (info.play > info.total) {
+            info.play = info.loop ? 0.0f : info.total;
         }
     }
 }

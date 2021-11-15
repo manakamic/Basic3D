@@ -8,14 +8,13 @@ namespace {
 namespace mv1 {
 
     player::player() {
-#if defined(_AMG_MATH)
         movement = 1.0;
         rotate = 1.0;
+
+#if defined(_AMG_MATH)
         direction = math::vector4(0.0, 0.0, -1.0);
         direction.normalized();
 #else
-        movement = 1.0f;
-        rotate = 1.0f;
         direction = VGet(0.0f, 0.0f, -1.0f);
         direction = VNorm(direction);
         moved = VGet(0.0f, 0.0f, 0.0f);
@@ -29,11 +28,7 @@ namespace mv1 {
         last_position = position;
 
         auto is_forward = false;
-#if defined(_AMG_MATH)
         auto rotate_value = 0.0;
-#else
-        auto rotate_value = 0.0f;
-#endif
 
         if (1 == CheckHitKey(KEY_INPUT_UP)) {
             is_forward = true;
@@ -45,13 +40,12 @@ namespace mv1 {
             rotate_value = rotate;
         }
 
-#if defined(_AMG_MATH)
         if (rotate_value != 0.0) {
+#if defined(_AMG_MATH)
             y_rotate.rotate_y(rotate_value, true);
             direction = direction * y_rotate;
             rotation.add(0.0, rotate_value, 0.0);
 #else
-        if (rotate_value != 0.0f) {
             y_rotate = MGetRotY(rotate_value * DEGREE_TO_RADIAN);
             direction = VTransform(direction, y_rotate);
             rotation.y += rotate_value;

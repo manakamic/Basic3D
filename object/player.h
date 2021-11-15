@@ -16,25 +16,19 @@ namespace mv1 {
 
         void process() override;
 
-#if defined(_AMG_MATH)
         void set_movement(const double movement) { this->movement = movement; };
         double get_movement() const { return movement; };
 
         void set_rotate(const double rotate) { this->rotate = rotate; };
         double get_rotate() const { return rotate; };
 
+#if defined(_AMG_MATH)
         void set_direction(const math::vector4& direction) { this->direction = direction; };
         math::vector4 get_direction() const { return direction; };
 
         math::vector4 get_moved() const { return moved; };
         math::vector4 get_last_position() const { return last_position; };
 #else
-        void set_movement(const float movement) { this->movement = movement; };
-        float get_movement() const { return movement; };
-
-        void set_rotate(const float rotate) { this->rotate = rotate; };
-        float get_rotate() const { return rotate; };
-
         void set_direction(const VECTOR direction) { this->direction = direction; };
         VECTOR get_direction() const { return direction; };
 
@@ -43,16 +37,15 @@ namespace mv1 {
 #endif
 
     private:
-#if defined(_AMG_MATH)
         double movement;
         double rotate;
+
+#if defined(_AMG_MATH)
         math::vector4 direction;
         math::vector4 moved;
         math::vector4 last_position;
         math::matrix44 y_rotate;
 #else
-        float movement;
-        float rotate;
         VECTOR direction;
         VECTOR moved;
         VECTOR last_position;
