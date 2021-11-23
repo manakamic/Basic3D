@@ -90,12 +90,8 @@ namespace math {
     bool utility::collision_plane_line(const plane& p, const vector4& line_start, const vector4& line_end, collision& result) {
         const vector4 plane_point  = std::get<0>(p);
         const vector4 plane_normal = std::get<1>(p);
-        auto point_to_start = line_start - plane_point;
-        auto point_to_end   = line_end   - plane_point;
-
-        point_to_start.normalized();
-        point_to_end.normalized();
-
+        const auto point_to_start = line_start - plane_point;
+        const auto point_to_end   = line_end   - plane_point;
         const auto dot_p_s = plane_normal.dot(point_to_start);
         const auto dot_p_e = plane_normal.dot(point_to_end);
         const auto pattern_a = (dot_p_s >= 0.0) && (dot_p_e <= 0.0);
@@ -105,10 +101,14 @@ namespace math {
         if (ret) {
             // •½–Ê‚Æü•ª‚ÌŒð“_
             const auto line = line_end - line_start;
-            const auto ratio = std::abs(dot_p_s) / std::abs(dot_p_s) + std::abs(dot_p_e);
+            const auto ratio = std::abs(dot_p_s) / (std::abs(dot_p_s) + std::abs(dot_p_e));
             const auto point = line_start + (line * ratio);
 
             std::get<1>(result) = point;
+            std::get<0>(result) = true;
+        }
+        else {
+            std::get<0>(result) = false;
         }
 
         return ret;
