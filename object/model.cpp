@@ -54,20 +54,20 @@ namespace mv1 {
         }
     }
 
-    bool model::set_attach(int index, bool loop, float speed) {
+    bool model::set_attach(int index, bool loop, std::function<void(void)> loop_end, float speed) {
         if (index >= anim_num) {
             return false;
         }
 
-        return attach_anim_info(main, index, loop, speed);
+        return attach_anim_info(main, index, loop, loop_end, speed);
     }
 
-    bool model::set_blend(int index, int frame, bool loop, float speed) {
+    bool model::set_blend(int index, int frame, bool loop, std::function<void(void)> loop_end, float speed) {
         if (index >= anim_num) {
             return false;
         }
 
-        auto ret = attach_anim_info(blend, index, loop, speed);
+        auto ret = attach_anim_info(blend, index, loop, loop_end, speed);
 
         if (ret) {
             blend_frame = frame;
@@ -77,7 +77,7 @@ namespace mv1 {
         return ret;
     }
 
-    bool model::attach_anim_info(anim_info& info, int index, bool loop, float speed) {
+    bool model::attach_anim_info(anim_info& info, int index, bool loop, std::function<void(void)> loop_end, float speed) {
         detach_anim_info(info);
 
         info.attach = MV1AttachAnim(handle, index);
@@ -89,6 +89,7 @@ namespace mv1 {
             info.total = MV1GetAttachAnimTotalTime(handle, info.attach);
             info.speed = speed;
             info.loop = loop;
+            info.loop_end = loop_end;
         }
 
         return ret;
@@ -117,6 +118,11 @@ namespace mv1 {
 
         if (info.play > info.total) {
             info.play = info.loop ? 0.0f : info.total;
+
+            if (info.loop_end != nullptr) {
+                info.loop_end();
+                info.loop_end = nullptr;
+            }
         }
     }
 }

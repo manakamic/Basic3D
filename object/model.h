@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include "model_base.h"
 
 namespace mv1 {
@@ -8,7 +9,7 @@ namespace mv1 {
     public:
         struct anim_info {
             void reset() {
-                index = -1; attach = -1; total = 0.0f; play = 0.0f; speed = 1.0f;  loop = false;
+                index = -1; attach = -1; total = 0.0f; play = 0.0f; speed = 1.0f;  loop = false; loop_end = nullptr;
             }
 
             int index;
@@ -17,6 +18,7 @@ namespace mv1 {
             float play;
             float speed;
             bool loop;
+            std::function<void(void)> loop_end;
         };
 
         // コンストラクタ
@@ -30,8 +32,8 @@ namespace mv1 {
         bool load(const TCHAR* fileName) override;
         void process() override;
 
-        bool set_attach(int index, bool loop = false, float speed = 1.0f);
-        bool set_blend(int index, int frame, bool loop = false, float speed = 1.0f);
+        bool set_attach(int index, bool loop = false, std::function<void(void)> loop_end = nullptr, float speed = 1.0f);
+        bool set_blend(int index, int frame, bool loop = false, std::function<void(void)> loop_end = nullptr, float speed = 1.0f);
 
         int get_anim_num() const { return anim_num; }
 
@@ -42,7 +44,7 @@ namespace mv1 {
 
     private:
         void process_blend();
-        bool attach_anim_info(anim_info& info, int index, bool loop, float speed);
+        bool attach_anim_info(anim_info& info, int index, bool loop, std::function<void(void)> loop_end, float speed);
         bool detach_anim_info(anim_info& info);
         void set_anim_time(anim_info& info);
 
