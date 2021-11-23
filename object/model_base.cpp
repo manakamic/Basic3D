@@ -33,7 +33,15 @@ namespace mv1 {
 
         handle = MV1LoadModel(fileName);
 
-        return (-1 != handle);
+        auto ret = (-1 != handle);
+
+        if (ret) {
+            // Z バッファを有効化
+            MV1SetUseZBuffer(handle, TRUE);
+            MV1SetWriteZBuffer(handle, TRUE);
+        }
+
+        return ret;
     }
 
     bool model_base::unload() {
