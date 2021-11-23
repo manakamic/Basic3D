@@ -22,6 +22,12 @@ namespace mv1 {
         void set_rotate(const double rotate) { this->rotate = rotate; };
         double get_rotate() const { return rotate; };
 
+        void set_jump_power(const double jump_power) { this->jump_power = jump_power; };
+        double get_jump_power() const { return jump_power; };
+
+        void set_jump_angle(const double jump_angle) { this->jump_angle = jump_angle; };
+        double get_jump_angle() const { return jump_angle; };
+
 #if defined(_AMG_MATH)
         void set_direction(const math::vector4& direction) { this->direction = direction; };
         math::vector4 get_direction() const { return direction; };
@@ -37,19 +43,46 @@ namespace mv1 {
 #endif
 
     private:
+        void process_forward(const bool is_forward);
+        void process_rotate(const double rotate_value);
+        void process_attack(const bool start_attack);
+        void process_jump(const bool start_jump);
+        
+#if defined(_AMG_MATH)
+        math::vector4 process_jump_logic_physics();
+        math::vector4 process_jump_logic_vector();
+        void process_jump_landing(const math::vector4& jump_position);
+#else
+        void process_jump_initialize();
+        VECTOR process_jump_logic_physics();
+        VECTOR process_jump_logic_vector();
+        void process_jump_landing(const VECTOR& jump_position);
+#endif
+
         double movement;
         double rotate;
+        double ground_y;
+        double jump_power;
+        double jump_angle;
+        double jump_timer;
+
+        bool is_jump;
+        bool is_attack;
 
 #if defined(_AMG_MATH)
         math::vector4 direction;
         math::vector4 moved;
+        math::vector4 jump_velocity;
+        math::vector4 jump_start_position;
         math::vector4 last_position;
-        math::matrix44 y_rotate;
+        math::matrix44 rotate_y;
 #else
         VECTOR direction;
         VECTOR moved;
+        VECTOR jump_velocity;
+        VECTOR jump_start_position;
         VECTOR last_position;
-        MATRIX y_rotate;
+        MATRIX rotate_y;
 #endif
     };
 }
