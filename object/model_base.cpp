@@ -45,7 +45,7 @@ namespace mv1 {
     }
 
     bool model_base::unload() {
-        if (-1 != handle) {
+        if (-1 == handle) {
             return false;
         }
 
