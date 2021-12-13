@@ -3,7 +3,7 @@
 
 namespace mv1 {
 
-    model::model() {
+    model::model() : model_base() {
         anim_num = 0;
         blend_frame = 0;
         blend_count = 0;

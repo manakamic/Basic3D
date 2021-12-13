@@ -15,7 +15,7 @@ namespace {
 
 namespace mv1 {
 
-    player::player() {
+    player::player() : model() {
         movement = 1.0;
         rotate = 1.0;
         ground_y = 0.0;
