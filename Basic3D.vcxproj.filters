@@ -87,22 +87,19 @@
     <ClCompile Include="object\player.cpp">
       <Filter>ソース ファイル\object</Filter>
     </ClCompile>
-    <ClCompile Include="main_13.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="task_05.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="task_05_answer_plus.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="object\primitive_base.cpp">
+      <Filter>ソース ファイル\object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\primitive_plane.cpp">
       <Filter>ソース ファイル\object</Filter>
     </ClCompile>
     <ClCompile Include="object\primitive_sphere.cpp">
       <Filter>ソース ファイル\object</Filter>
     </ClCompile>
-    <ClCompile Include="object\primitive_plane.cpp">
+    <ClCompile Include="object\posture_base.cpp">
+      <Filter>ソース ファイル\object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\primitive_cube.cpp">
       <Filter>ソース ファイル\object</Filter>
     </ClCompile>
   </ItemGroup>
@@ -131,10 +128,16 @@
     <ClInclude Include="object\primitive_base.h">
       <Filter>ヘッダー ファイル\object</Filter>
     </ClInclude>
+    <ClInclude Include="object\primitive_plane.h">
+      <Filter>ヘッダー ファイル\object</Filter>
+    </ClInclude>
     <ClInclude Include="object\primitive_sphere.h">
       <Filter>ヘッダー ファイル\object</Filter>
     </ClInclude>
-    <ClInclude Include="object\primitive_plane.h">
+    <ClInclude Include="object\posture_base.h">
+      <Filter>ヘッダー ファイル\object</Filter>
+    </ClInclude>
+    <ClInclude Include="object\primitive_cube.h">
       <Filter>ヘッダー ファイル\object</Filter>
     </ClInclude>
   </ItemGroup>

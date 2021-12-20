@@ -47,13 +47,12 @@ namespace mv1 {
         void process_rotate(const double rotate_value);
         void process_attack(const bool start_attack);
         void process_jump(const bool start_jump);
-        
+        void process_jump_initialize();
 #if defined(_AMG_MATH)
         math::vector4 process_jump_logic_physics();
         math::vector4 process_jump_logic_vector();
         void process_jump_landing(const math::vector4& jump_position);
 #else
-        void process_jump_initialize();
         VECTOR process_jump_logic_physics();
         VECTOR process_jump_logic_vector();
         void process_jump_landing(const VECTOR& jump_position);
