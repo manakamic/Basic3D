@@ -1,9 +1,5 @@
 #include "DxLib.h"
 #include "posture_base.h"
-#if defined(_AMG_MATH)
-#include "vector4.h"
-#include "matrix44.h"
-#endif
 
 namespace {
     constexpr auto DEGREE_TO_RADIAN = DX_PI_F / 180.0f;
@@ -21,6 +17,10 @@ posture_base::posture_base() {
 }
 
 void posture_base::process_posture() {
+    if (update != nullptr) {
+        update(this);
+    }
+
 #if defined(_AMG_MATH)
     posture.scale(scale.get_x(), scale.get_y(), scale.get_z(), true);
     posture.rotate_z(rotation.get_z(), false);

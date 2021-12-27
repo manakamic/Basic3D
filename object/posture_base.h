@@ -1,5 +1,5 @@
 #pragma once
-
+#include <functional>
 #include <tchar.h>
 #if defined(_AMG_MATH)
 #include "vector4.h"
@@ -20,6 +20,8 @@ public:
     virtual ~posture_base() = default;
 
     virtual void process_posture();
+
+    void set_update(const std::function<void(posture_base*)>& update) { this->update = update; }
 
 #if defined(_AMG_MATH)
     virtual void set_position(const math::vector4& position) { this->position = position; };
@@ -44,6 +46,8 @@ public:
 #endif
 
 protected:
+    std::function<void(posture_base*)> update;
+
 #if defined(_AMG_MATH)
     math::vector4 position;
     math::vector4 rotation;
