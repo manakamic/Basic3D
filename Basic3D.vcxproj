@@ -233,6 +233,7 @@
     <ClCompile Include="math\matrix44.cpp" />
     <ClCompile Include="math\utility.cpp" />
     <ClCompile Include="math\vector4.cpp" />
+    <ClCompile Include="object\camera_base.cpp" />
     <ClCompile Include="object\model.cpp" />
     <ClCompile Include="object\model_base.cpp" />
     <ClCompile Include="object\player.cpp" />
@@ -241,12 +242,14 @@
     <ClCompile Include="object\primitive_cube.cpp" />
     <ClCompile Include="object\primitive_plane.cpp" />
     <ClCompile Include="object\primitive_sphere.cpp" />
+    <ClCompile Include="object\world_base.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dx_utility.h" />
     <ClInclude Include="math\matrix44.h" />
     <ClInclude Include="math\utility.h" />
     <ClInclude Include="math\vector4.h" />
+    <ClInclude Include="object\camera_base.h" />
     <ClInclude Include="object\model.h" />
     <ClInclude Include="object\model_base.h" />
     <ClInclude Include="object\player.h" />
@@ -255,6 +258,7 @@
     <ClInclude Include="object\primitive_cube.h" />
     <ClInclude Include="object\primitive_plane.h" />
     <ClInclude Include="object\primitive_sphere.h" />
+    <ClInclude Include="object\world_base.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
