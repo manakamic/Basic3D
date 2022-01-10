@@ -18,6 +18,8 @@ namespace primitive {
         bool initialize(double radius, int division_num);
         bool create() override;
 
+        double get_radius() const { return radius; }
+
     protected:
         double radius;
         int division_num;
