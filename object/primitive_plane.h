@@ -18,6 +18,8 @@ namespace primitive {
         bool initialize(double size, int division_num);
         bool create() override;
 
+        const face get_info() const;
+
     protected:
         double size;
         int division_num;

@@ -1,6 +1,11 @@
 #include <array>
 #include "DxLib.h"
 #include "primitive_plane.h"
+#include "vector4.h"
+#include "matrix44.h"
+#if !defined(_AMG_MATH)
+#include "dx_utility.h"
+#endif
 
 namespace {
     constexpr auto DEFAULT_SIZE = 100.0;
@@ -9,6 +14,8 @@ namespace {
     constexpr COLOR_U8 DEFAULT_DIFFUSE = { 255, 255, 255, 255 };
     constexpr COLOR_U8 DEFAULT_SPECULAR = { 0, 0, 0, 0 };
     constexpr VECTOR DEFAULT_NORMAL = { 0.0f, 1.0f, 0.0f };
+
+
 }
 
 namespace primitive {
@@ -33,11 +40,11 @@ namespace primitive {
     bool plane::create() {
         auto division_num_d = static_cast<double>(division_num);
         auto polygon_size = size / division_num_d;
-        // 地面全体の中心を原点にするオフセット
+        // 平面全体の中心を原点にするオフセット
         auto half_polygon_size = polygon_size * 0.5f;
         auto start_x = -half_polygon_size * division_num_d;
         auto start_z = -half_polygon_size * division_num_d;
-        // 地面の基本の正方形用テーブル
+        // 平面の基本の正方形用テーブル
         VECTOR position_0 = { 0.0f, 0.0f, 0.0f };
         VECTOR position_1 = { 0.0f, 0.0f, polygon_size };
         VECTOR position_2 = { polygon_size, 0.0f, 0.0f };
@@ -93,5 +100,36 @@ namespace primitive {
         }
 
         return true;
+    }
+
+    const face plane::get_info() const {
+        auto half_size = size * 0.5;
+        auto base_position_00 = math::vector4(-half_size, 0.0, -half_size);
+        auto base_position_01 = math::vector4(-half_size, 0.0,  half_size);
+        auto base_position_02 = math::vector4( half_size, 0.0, -half_size);
+        auto base_position_03 = math::vector4( half_size, 0.0,  half_size);
+        auto base_normal = math::vector4(0.0, 1.0, 0.0);
+#if defined(_AMG_MATH)
+        auto position_00 = base_position_00 * posture_matrix;
+        auto position_01 = base_position_01 * posture_matrix;
+        auto position_02 = base_position_02 * posture_matrix;
+        auto position_03 = base_position_03 * posture_matrix;
+        auto normal = base_normal * rotate_matrix;
+#else
+        MATRIX posture_dx = posture_matrix;
+        auto posture_math = ToMath(posture_dx);
+        auto position_00 = base_position_00 * posture_math;
+        auto position_01 = base_position_01 * posture_math;
+        auto position_02 = base_position_02 * posture_math;
+        auto position_03 = base_position_03 * posture_math;
+        MATRIX rotate_dx = rotate_matrix;
+        auto rotate_math = ToMath(rotate_dx);
+        auto normal = base_normal * rotate_math;
+#endif
+        std::array<math::vector4, 4> vertices = {
+            position_00, position_01, position_02, position_03
+        };
+
+        return std::make_tuple(vertices, normal);
     }
 }
