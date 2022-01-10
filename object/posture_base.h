@@ -27,22 +27,26 @@ public:
     virtual void set_position(const math::vector4& position) { this->position = position; };
     virtual void set_rotation(const math::vector4& rotation) { this->rotation = rotation; };
     virtual void set_scale(const math::vector4& scale) { this->scale = scale; };
-    virtual void set_posture(const math::matrix44& posture) { this->posture = posture; };
 
     virtual math::vector4 get_position() const { return position; };
     virtual math::vector4 get_rotation() const { return rotation; };
     virtual math::vector4 get_scale() const { return scale; };
-    virtual math::matrix44 get_posture() const { return posture; };
+    virtual math::matrix44 get_scale_matrix() const { return scale_matrix; };
+    virtual math::matrix44 get_rotate_matrix() const { return rotate_matrix; };
+    virtual math::matrix44 get_transfer_matrix() const { return transfer_matrix; };
+    virtual math::matrix44 get_posture_matrix() const { return posture_matrix; };
 #else
     virtual void set_position(const VECTOR position) { this->position = position; };
     virtual void set_rotation(const VECTOR rotation) { this->rotation = rotation; };
     virtual void set_scale(const VECTOR scale) { this->scale = scale; };
-    virtual void set_posture(const MATRIX posture) { this->posture = posture; };
 
     virtual VECTOR get_position() const { return position; };
     virtual VECTOR get_rotation() const { return rotation; };
     virtual VECTOR get_scale() const { return scale; };
-    virtual MATRIX get_posture() const { return posture; };
+    virtual MATRIX get_scale_matrix() const { return scale_matrix; };
+    virtual MATRIX get_rotate_matrix() const { return rotate_matrix; };
+    virtual MATRIX get_transfer_matrix() const { return transfer_matrix; };
+    virtual MATRIX get_posture_matrix() const { return posture_matrix; };
 #endif
 
 protected:
@@ -52,11 +56,17 @@ protected:
     math::vector4 position;
     math::vector4 rotation;
     math::vector4 scale;
-    math::matrix44 posture;
+    math::matrix44 scale_matrix;
+    math::matrix44 rotate_matrix;
+    math::matrix44 transfer_matrix;
+    math::matrix44 posture_matrix;
 #else
     VECTOR position;
     VECTOR rotation;
     VECTOR scale;
-    MATRIX posture;
+    MATRIX scale_matrix;
+    MATRIX rotate_matrix;
+    MATRIX transfer_matrix;
+    MATRIX posture_matrix;
 #endif
 };
