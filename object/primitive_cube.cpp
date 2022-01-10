@@ -20,6 +20,9 @@ namespace {
     std::array<math::vector4, 6> normal_list = {
         normal_front, normal_right, normal_back, normal_left, normal_top, normal_bottom
     };
+
+    constexpr auto DEBUG_NORMAL_SCALE = 50.0f;
+    const auto debug_normal_color = GetColor(255, 0, 0);
 }
 
 namespace primitive {
@@ -116,22 +119,24 @@ namespace primitive {
         auto index = static_cast<int>(type);
 #if defined(_AMG_MATH)
         std::array<math::vector4, 4> face_vertices = {
-            face_list[index][0] * posture,
-            face_list[index][1] * posture,
-            face_list[index][2] * posture,
-            face_list[index][3] * posture
-        };
-        auto face_normal = normal_list[index] * posture;
-#else
-        MATRIX temp = posture;
-        auto posture_matrix = ToMath(temp);
-        std::array<math::vector4, 4> face_vertices = {
             face_list[index][0] * posture_matrix,
             face_list[index][1] * posture_matrix,
             face_list[index][2] * posture_matrix,
             face_list[index][3] * posture_matrix
         };
-        auto face_normal = normal_list[index] * posture_matrix;
+        auto face_normal = normal_list[index] * rotate_matrix;
+#else
+        MATRIX posture_dx = posture_matrix;
+        auto posture_math = ToMath(posture_dx);
+        std::array<math::vector4, 4> face_vertices = {
+            face_list[index][0] * posture_math,
+            face_list[index][1] * posture_math,
+            face_list[index][2] * posture_math,
+            face_list[index][3] * posture_math
+        };
+        MATRIX rotate_dx = rotate_matrix;
+        auto rotate_math = ToMath(rotate_dx);
+        auto face_normal = normal_list[index] * rotate_math;
 #endif
 
         return std::make_tuple(face_vertices, face_normal);

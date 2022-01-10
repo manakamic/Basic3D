@@ -8,7 +8,9 @@
 
 namespace {
     constexpr auto DEGREE_TO_RADIAN = DX_PI_F / 180.0f;
-    MATRIX identity = MGetIdent();
+    constexpr auto DEBUG_NORMAL_SCALE = 50.0f;
+    const auto debug_normal_color = GetColor(255, 0, 0);
+    const MATRIX identity = MGetIdent();
 }
 
 namespace primitive {
@@ -18,6 +20,8 @@ namespace primitive {
 
         vertex.reset(new std::vector<VERTEX3D>());
         index.reset(new std::vector<unsigned short>());
+
+        is_debug = false;
     }
 
     primitive_base::~primitive_base() {
@@ -61,13 +65,31 @@ namespace primitive {
         SetWriteZBuffer3D(TRUE);
 
 #if defined(_AMG_MATH)
-        auto posture_dx = ToDX(posture);
+        auto posture_dx = ToDX(posture_matrix);
         SetTransformToWorld(&posture_dx);
 #else
-        SetTransformToWorld(&posture);
+        SetTransformToWorld(&posture_matrix);
 #endif
         DrawPolygonIndexed3D(vertex->data(), vertex_num, index->data(), polygon_num, use_handle, FALSE);
         SetTransformToWorld(&identity);
+
+        if (is_debug) {
+#if defined(_AMG_MATH)
+            MATRIX posture_dx = ToDX(posture_matrix);
+            MATRIX rotate_dx = ToDX(rotate_matrix);
+#else
+            MATRIX posture_dx = posture_matrix;
+            MATRIX rotate_dx = rotate_matrix;
+#endif
+
+            for (auto iterator = vertex->begin(); iterator != vertex->end(); ++iterator) {
+                VERTEX3D v = *iterator;
+                VECTOR position = VTransform(v.pos, posture_dx);
+                VECTOR normal = VTransform(v.norm, rotate_dx);
+
+                DrawLine3D(position, VAdd(position, VScale(normal, DEBUG_NORMAL_SCALE)), debug_normal_color);
+            }
+        }
 
         return true;
     }

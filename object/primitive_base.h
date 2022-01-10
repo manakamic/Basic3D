@@ -1,18 +1,21 @@
 #pragma once
+#include <tuple>
+#include <array>
 #include <tchar.h>
 #include <memory>
 #include <vector>
 #include "posture_base.h"
-#if defined(_AMG_MATH)
-#include "vector4.h"
-#include "matrix44.h"
-#else
-struct tagVECTOR;
-struct tagMATRIX;
+
 struct tagVERTEX3D;
-#endif
+
+namespace math {
+    class vector4;
+}
 
 namespace primitive {
+
+    using face = std::tuple<std::array<math::vector4, 4>/*vertex*/, math::vector4/*normal*/>;
+
     class primitive_base : public posture_base {
     public:
         // コンストラクタ
@@ -34,10 +37,15 @@ namespace primitive {
         const std::shared_ptr<std::vector<VERTEX3D>>& get_vertex() const { return vertex; }
         const std::shared_ptr<std::vector<unsigned short>>& get_index() const { return index; }
 
+        void set_debug(const bool debug) { is_debug = debug; };
+        const bool get_debug() const { return is_debug; };
+
     protected:
         int handle;
 
         std::shared_ptr<std::vector<VERTEX3D>> vertex;
         std::shared_ptr<std::vector<unsigned short>> index;
+
+        bool is_debug;
     };
 }

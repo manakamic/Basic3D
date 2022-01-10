@@ -1,7 +1,6 @@
 #pragma once
 #include <array>
 #include <vector>
-#include <tuple>
 #include "primitive_base.h"
 
 namespace math {
@@ -9,8 +8,6 @@ namespace math {
 }
 
 namespace primitive {
-
-    using face = std::tuple<std::array<math::vector4, 4>/*vertex*/, math::vector4/*normal*/>;
 
     class cube : public primitive_base {
     public:
@@ -31,6 +28,8 @@ namespace primitive {
         bool create() override;
 
         const face get_face(face_type type) const;
+
+        double get_size() const { return size; }
 
     protected:
         double size;
