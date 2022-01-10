@@ -40,9 +40,9 @@ namespace mv1 {
         posture_base::process_posture();
 
 #if defined(_AMG_MATH)
-        MV1SetMatrix(handle, ToDX(posture));
+        MV1SetMatrix(handle, ToDX(posture_matrix));
 #else
-        MV1SetMatrix(handle, posture);
+        MV1SetMatrix(handle, posture_matrix);
 #endif
     }
 
