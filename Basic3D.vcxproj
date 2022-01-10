@@ -151,12 +151,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="camera_logic.cpp" />
     <ClCompile Include="dx_utility.cpp" />
     <ClCompile Include="main_00.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="main_01.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -230,6 +231,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="main_world.cpp" />
     <ClCompile Include="math\matrix44.cpp" />
     <ClCompile Include="math\utility.cpp" />
     <ClCompile Include="math\vector4.cpp" />
@@ -243,8 +245,10 @@
     <ClCompile Include="object\primitive_plane.cpp" />
     <ClCompile Include="object\primitive_sphere.cpp" />
     <ClCompile Include="object\world_base.cpp" />
+    <ClCompile Include="world_logic.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera_logic.h" />
     <ClInclude Include="dx_utility.h" />
     <ClInclude Include="math\matrix44.h" />
     <ClInclude Include="math\utility.h" />
@@ -259,6 +263,7 @@
     <ClInclude Include="object\primitive_plane.h" />
     <ClInclude Include="object\primitive_sphere.h" />
     <ClInclude Include="object\world_base.h" />
+    <ClInclude Include="world_logic.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
