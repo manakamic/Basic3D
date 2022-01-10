@@ -5,7 +5,7 @@
 namespace math {
 
     vector4::vector4() {
-        x = 0.0l; y = 0.0; z = 0.0; w = 1.0;
+        x = 0.0; y = 0.0; z = 0.0; w = 1.0;
     }
 
     void vector4::set(const vector4& vector) {
