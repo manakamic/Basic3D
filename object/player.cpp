@@ -253,6 +253,11 @@ namespace mv1 {
                         if (is_jump) {
                             jump_velocity_initialize_reflect();
                         }
+                        else {
+                            auto normal = std::get<1>(face);
+
+                            process_press_forward(normal);
+                        }
                         // 他の側面との判定は不要
                         break;
                     }
@@ -261,6 +266,39 @@ namespace mv1 {
         }
 
         return true;
+    }
+
+    void player::process_press_forward(const math::vector4& normal) {
+#if defined(_AMG_MATH)
+        auto player_dir = direction;
+#else
+        auto player_dir = ToMath(direction);
+#endif
+        auto up = math::vector4(0.0, 1.0, 0.0);
+        auto xz_dir = math::vector4(normal.get_x(), 0.0, normal.get_z());
+
+        xz_dir.normalized();
+
+        auto check = xz_dir.cross(player_dir);
+        auto forward = math::vector4();
+
+        // 外積の結果の Y の値の正負で左右判定
+        if (check.get_y() < 0.0) {
+            forward = xz_dir.cross(up);
+        }
+        else if (check.get_y() > 0.0) {
+            forward = up.cross(xz_dir);
+        }
+
+        // 面に当たっているので内積の値は -1 ~ 0
+        auto power = movement * (1.0 + xz_dir.dot(player_dir));
+        auto moved = forward * power;
+
+#if defined(_AMG_MATH)
+        position = position + moved;
+#else
+        position = VAdd(position, ToDX(moved));
+#endif
     }
 
     // primitive::sphere との距離をチェックする
