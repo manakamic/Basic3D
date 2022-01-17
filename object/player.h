@@ -74,7 +74,7 @@ namespace mv1 {
         bool process_collision_sphere(std::shared_ptr<primitive::primitive_base>& primitive);
         bool process_collision_cube(std::shared_ptr<primitive::primitive_base>& primitive);
 
-        void process_forward(const bool is_forward);
+        void process_forward();
         void process_press_forward(const math::vector4& normal);
         void process_rotate(const double rotate_value);
         void process_attack(const bool start_attack);
@@ -119,6 +119,7 @@ namespace mv1 {
         bool is_jump;
         bool is_fall;
         bool is_back;
+        bool is_forward;
         bool is_attack;
         bool is_debug;
 

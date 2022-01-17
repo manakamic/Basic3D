@@ -44,6 +44,7 @@ namespace mv1 {
         is_jump = false;
         is_fall = false;
         is_back = false;
+        is_forward = false;
         is_attack = false;
         is_debug = false;
 
@@ -68,7 +69,6 @@ namespace mv1 {
 
         auto start_jump = false;
         auto start_attack = false;
-        auto is_forward = false;
         auto start_back = false;
         auto rotate_value = 0.0;
 
@@ -88,9 +88,7 @@ namespace mv1 {
             }
         }
 
-        if (1 == CheckHitKey(KEY_INPUT_UP)) {
-            is_forward = true;
-        }
+        is_forward = (1 == CheckHitKey(KEY_INPUT_UP));
 
         if (1 == CheckHitKey(KEY_INPUT_DOWN)) {
             if (!is_back) {
@@ -124,7 +122,7 @@ namespace mv1 {
             }
             else {
                 process_rotate(rotate_value);
-                process_forward(is_forward);
+                process_forward();
             }
         }
 
@@ -253,7 +251,7 @@ namespace mv1 {
                         if (is_jump) {
                             jump_velocity_initialize_reflect();
                         }
-                        else {
+                        else if (is_forward) {
                             auto normal = std::get<1>(face);
 
                             process_press_forward(normal);
@@ -411,7 +409,7 @@ namespace mv1 {
 #endif
     }
 
-    void player::process_forward(const bool is_forward) {
+    void player::process_forward() {
         if (is_forward) {
             if (!is_blend() && 1 != get_main_index()) {
                 set_blend(1, 10, true);
