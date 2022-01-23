@@ -22,6 +22,7 @@ public:
     virtual void process_posture();
 
     void set_update(const std::function<void(posture_base*)>& update) { this->update = update; }
+    void set_update_after(const std::function<void(posture_base*)>& update_after) { this->update_after = update_after; }
 
 #if defined(_AMG_MATH)
     virtual void set_position(const math::vector4& position) { this->position = position; };
@@ -35,6 +36,7 @@ public:
     virtual math::matrix44 get_rotate_matrix() const { return rotate_matrix; };
     virtual math::matrix44 get_transfer_matrix() const { return transfer_matrix; };
     virtual math::matrix44 get_posture_matrix() const { return posture_matrix; };
+    virtual void set_posture_matrix(const math::matrix44& posture) { this->posture_matrix = posture; };
 #else
     virtual void set_position(const VECTOR position) { this->position = position; };
     virtual void set_rotation(const VECTOR rotation) { this->rotation = rotation; };
@@ -47,10 +49,12 @@ public:
     virtual MATRIX get_rotate_matrix() const { return rotate_matrix; };
     virtual MATRIX get_transfer_matrix() const { return transfer_matrix; };
     virtual MATRIX get_posture_matrix() const { return posture_matrix; };
+    virtual void set_posture_matrix(const MATRIX& posture) { this->posture_matrix = posture; };
 #endif
 
 protected:
     std::function<void(posture_base*)> update;
+    std::function<void(posture_base*)> update_after;
 
 #if defined(_AMG_MATH)
     math::vector4 position;

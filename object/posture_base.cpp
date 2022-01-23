@@ -45,4 +45,8 @@ void posture_base::process_posture() {
     transfer_matrix = MGetTranslate(position);
     posture_matrix = MMult(MMult(scale_matrix, rotate_matrix), transfer_matrix);
 #endif
+
+    if (update_after != nullptr) {
+        update_after(this);
+    }
 }
