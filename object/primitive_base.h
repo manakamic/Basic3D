@@ -34,6 +34,15 @@ namespace primitive {
         virtual void process();
         virtual bool render();
 
+        bool set_handle(const int handle);
+        int get_handle() const { return handle; }
+
+        void set_lighting(const int lighting) { this->lighting = lighting; };
+        const int get_lighting() const { return lighting; };
+
+        void set_transparent(const int transparent) { this->transparent = transparent; };
+        const int get_transparent() const { return transparent; };
+
         const std::shared_ptr<std::vector<VERTEX3D>>& get_vertex() const { return vertex; }
         const std::shared_ptr<std::vector<unsigned short>>& get_index() const { return index; }
 
@@ -42,6 +51,8 @@ namespace primitive {
 
     protected:
         int handle;
+        int lighting;
+        int transparent;
 
         std::shared_ptr<std::vector<VERTEX3D>> vertex;
         std::shared_ptr<std::vector<unsigned short>> index;

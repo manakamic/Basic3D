@@ -17,6 +17,8 @@ namespace primitive {
 
     primitive_base::primitive_base() : posture_base() {
         handle = -1;
+        lighting = TRUE;
+        transparent = FALSE;
 
         vertex.reset(new std::vector<VERTEX3D>());
         index.reset(new std::vector<unsigned short>());
@@ -45,6 +47,14 @@ namespace primitive {
         return (-1 != DeleteGraph(handle));
     }
 
+    bool primitive_base::set_handle(const int handle) {
+        auto result = unload();
+
+        this->handle = handle;
+
+        return result;
+    }
+
     void primitive_base::process() {
         process_posture();
     }
@@ -70,7 +80,11 @@ namespace primitive {
 #else
         SetTransformToWorld(&posture_matrix);
 #endif
-        DrawPolygonIndexed3D(vertex->data(), vertex_num, index->data(), polygon_num, use_handle, FALSE);
+        SetUseLighting(lighting);
+
+        DrawPolygonIndexed3D(vertex->data(), vertex_num, index->data(), polygon_num, use_handle, transparent);
+
+        SetUseLighting(TRUE);
         SetTransformToWorld(&identity);
 
         if (is_debug) {
