@@ -208,33 +208,20 @@ namespace {
 #if false
             auto update_after_plale = [](posture_base* base)-> void {
 #if defined(_AMG_MATH)
-                auto view = camera->get_view_matrix();
-                auto inverse = view.get_inverse();
-
-                // 平行移動成分はカットする
-                inverse.set_value(3, 0, 0.0);
-                inverse.set_value(3, 1, 0.0);
-                inverse.set_value(3, 2, 0.0);
-
+                auto billboard = camera->get_billboard_matrix();
                 auto scale = base->get_scale_matrix();
                 auto rotate = base->get_rotate_matrix();
                 auto transfer = base->get_transfer_matrix();
                 // plane は XZ 方向に頂点が作成されるので最初に回転処理を行う
-                auto posture = scale * rotate * inverse * transfer;
+                auto posture = scale * rotate * billboard * transfer;
 
                 base->set_posture_matrix(posture);
 #else
-                MATRIX view = camera->get_view_matrix();
-                MATRIX inverse = MInverse(view);
-
-                inverse.m[3][0] = 0.0f;
-                inverse.m[3][1] = 0.0f;
-                inverse.m[3][2] = 0.0f;
-
+                MATRIX billboard = camera->get_billboard_matrix();
                 MATRIX scale = base->get_scale_matrix();
                 MATRIX rotate = base->get_rotate_matrix();
                 MATRIX transfer = base->get_transfer_matrix();
-                MATRIX posture = MMult(MMult(MMult(scale, rotate), inverse), transfer);
+                MATRIX posture = MMult(MMult(MMult(scale, rotate), billboard), transfer);
 
                 base->set_posture_matrix(posture);
 #endif

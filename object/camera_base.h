@@ -41,6 +41,7 @@ namespace world {
         const math::vector4 get_up() const { return up; }
         const math::matrix44 get_view_matrix() const;
         const math::matrix44 get_projection_matrix() const;
+        const math::matrix44 get_billboard_matrix() const;
 #else
         void set_position(const VECTOR& position) { this->position = position; }
         void set_target(const VECTOR& target) { this->target = target; }
@@ -50,6 +51,7 @@ namespace world {
         VECTOR get_up() const { return up; }
         MATRIX get_view_matrix() const;
         MATRIX get_projection_matrix() const;
+        MATRIX get_billboard_matrix() const;
 #endif
 
     protected:

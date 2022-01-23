@@ -72,6 +72,18 @@ namespace world {
 
         return projection_matrix;
     }
+
+    const math::matrix44 camera_base::get_billboard_matrix() const {
+        auto view_matrix = get_view_matrix();
+        auto inverse_matrix = view_matrix.get_inverse();
+
+        // 平行移動成分はカットする
+        inverse_matrix.set_value(3, 0, 0.0);
+        inverse_matrix.set_value(3, 1, 0.0);
+        inverse_matrix.set_value(3, 2, 0.0);
+
+        return inverse_matrix;
+    }
 #else
     MATRIX camera_base::get_view_matrix() const {
         return GetCameraViewMatrix();
@@ -79,6 +91,17 @@ namespace world {
 
     MATRIX camera_base::get_projection_matrix() const {
         return GetCameraProjectionMatrix();
+    }
+
+    MATRIX camera_base::get_billboard_matrix() const {
+        MATRIX view_matrix = get_view_matrix();
+        MATRIX inverse_matrix = MInverse(view_matrix);
+
+        inverse_matrix.m[3][0] = 0.0f;
+        inverse_matrix.m[3][1] = 0.0f;
+        inverse_matrix.m[3][2] = 0.0f;
+
+        return inverse_matrix;
     }
 #endif
 }
