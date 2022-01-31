@@ -9,6 +9,7 @@
 #include "world_base.h"
 #include "camera_base.h"
 #include "player.h"
+#include "gun.h"
 #include "primitive_plane.h"
 #include "primitive_sphere.h"
 #include "primitive_cube.h"
@@ -17,6 +18,7 @@
 namespace {
     // ファイル
     constexpr auto MODEL_FILE = _T("model/character/SDChar.mv1");
+    constexpr auto MODEL_GUN_FILE = _T("model/gun/Handgun_fbx_6.1_ASCII.mv1");
     constexpr auto TEXTURE_FILE_GROUND = _T("texture/Groundplants1_D.jpg");
     constexpr auto TEXTURE_FILE_SPHERE = _T("texture/earth.png");
     constexpr auto TEXTURE_FILE_STEPS = _T("texture/kime-yoko.jpg");
@@ -59,6 +61,38 @@ namespace {
         player->set_movement(MODEL_MOVEMENT);
         // コリジョン値を指定
         player->set_collision_sphere_radius(MODEL_COLLISION_SPHERE_RADIUS);
+
+        return true;
+    }
+
+    bool gun_initialize(std::shared_ptr<mv1::gun>& gun, std::shared_ptr<mv1::player>& player) {
+
+        if (!gun->load(MODEL_GUN_FILE) || !gun->initialize()) {
+            return false;
+        }
+
+        MATRIX offset = gun->get_offset_matrix();
+
+        // shared_ptr などは参照でキャプチャしてはいけない(コピー使用にする)
+        auto update_gun = [player, offset](posture_base* base)-> void {
+            auto hundle = player->get_handle();
+
+            if (hundle == -1) {
+                return;
+            }
+
+            // DxLibModelViewer_64bit.exe で調べた Frame の番号
+            MATRIX player_hand = MV1GetFrameLocalWorldMatrix(hundle, 28);
+            MATRIX posture = MMult(offset, player_hand);
+
+#if defined(_AMG_MATH)
+            base->set_posture_matrix(ToMath(posture));
+#else
+            base->set_posture_matrix(posture);
+#endif
+    };
+
+        gun->set_update_after(update_gun);
 
         return true;
     }
@@ -206,6 +240,8 @@ namespace {
 
             // ビルボード処理
 #if false
+            plane->set_update_posture_matrix(false);
+
             auto update_after_plale = [](posture_base* base)-> void {
 #if defined(_AMG_MATH)
                 auto billboard = camera->get_billboard_matrix();
@@ -295,6 +331,15 @@ std::shared_ptr<world::world_base> world_initialize(const int screen_width, cons
     }
 
     player->set_collision_primitive(plane);
+
+    // 銃 モデルをキャラクターモデルに持たせる
+#if true
+    std::shared_ptr<mv1::gun> gun(new mv1::gun());
+
+    if (gun_initialize(gun, player)) {
+        world->add_model(gun);
+    }
+#endif
 
     return world;
 }
