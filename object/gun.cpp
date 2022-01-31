@@ -7,6 +7,11 @@ namespace {
 
 namespace mv1 {
 
+    gun::gun() {
+        offset_matrix = MGetIdent();
+        target_frame = -1;
+    }
+
     bool gun::initialize() {
         if (handle == -1) {
             return false;
@@ -23,6 +28,18 @@ namespace mv1 {
         MV1SetFrameVisible(handle, 11, FALSE);
         MV1SetFrameVisible(handle, 12, FALSE);
         MV1SetFrameVisible(handle, 13, FALSE);
+
+        return true;
+    }
+
+    bool gun::setup_offset_matrix(std::shared_ptr<mv1::model_base>& target) {
+        // DxLibModelViewer_64bit.exe で調べた キャラクターモデルの 銃を持たせたい Frame の番号
+        // Viewer で Frame 番号を見ているはずなので直接数値を扱っても良い
+        target_frame = MV1SearchFrame(target->get_handle(), _T("SDChar_RightHand"));
+
+        if (target_frame < 0) {
+            return false;
+        }
 
         // キャラクター モデルとの大きさをスケールで合わせる
         MATRIX gun_scale = MGetScale(VGet(15.0f, 15.0f, 15.0f));
