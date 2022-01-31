@@ -66,23 +66,25 @@ namespace {
     }
 
     bool gun_initialize(std::shared_ptr<mv1::gun>& gun, std::shared_ptr<mv1::player>& player) {
+        auto player_base = std::dynamic_pointer_cast<mv1::model_base>(player);
 
-        if (!gun->load(MODEL_GUN_FILE) || !gun->initialize()) {
+        if (!gun->load(MODEL_GUN_FILE) || !gun->initialize() || !gun->setup_offset_matrix(player_base)) {
             return false;
         }
 
+        // update 系メソッドは posture_base class しか渡ってこないので、必要な情報はラムダ式にキャプチャさせる
         MATRIX offset = gun->get_offset_matrix();
+        auto frame_index = gun->get_target_frame();
 
         // shared_ptr などは参照でキャプチャしてはいけない(コピー使用にする)
-        auto update_gun = [player, offset](posture_base* base)-> void {
+        auto update_gun = [player, offset, frame_index](posture_base* base)-> void {
             auto hundle = player->get_handle();
 
             if (hundle == -1) {
                 return;
             }
 
-            // DxLibModelViewer_64bit.exe で調べた Frame の番号
-            MATRIX player_hand = MV1GetFrameLocalWorldMatrix(hundle, 28);
+            MATRIX player_hand = MV1GetFrameLocalWorldMatrix(hundle, frame_index/*28*/);
             MATRIX posture = MMult(offset, player_hand);
 
 #if defined(_AMG_MATH)
@@ -333,7 +335,7 @@ std::shared_ptr<world::world_base> world_initialize(const int screen_width, cons
     player->set_collision_primitive(plane);
 
     // 銃 モデルをキャラクターモデルに持たせる
-#if true
+#if false
     std::shared_ptr<mv1::gun> gun(new mv1::gun());
 
     if (gun_initialize(gun, player)) {
