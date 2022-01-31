@@ -52,6 +52,9 @@ public:
     virtual void set_posture_matrix(const MATRIX& posture) { this->posture_matrix = posture; };
 #endif
 
+    virtual void set_update_posture_matrix(const bool update) { update_posture_matrix = update; }
+    virtual bool get_update_posture_matrix() const { return update_posture_matrix; }
+
 protected:
     std::function<void(posture_base*)> update;
     std::function<void(posture_base*)> update_after;
@@ -73,4 +76,6 @@ protected:
     MATRIX transfer_matrix;
     MATRIX posture_matrix;
 #endif
+
+    bool update_posture_matrix;
 };
