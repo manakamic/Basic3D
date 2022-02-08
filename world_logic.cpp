@@ -4,12 +4,15 @@
 //! @brief 3D main_world.cpp 用の 3D 世界(world_base class)の実装
 //!
 #include "DxLib.h"
+#include "utility.h"
+#include "vector4.h"
 #include "world_logic.h"
 #include "camera_logic.h"
 #include "world_base.h"
 #include "camera_base.h"
 #include "player.h"
 #include "gun.h"
+#include "missile.h"
 #include "primitive_plane.h"
 #include "primitive_sphere.h"
 #include "primitive_cube.h"
@@ -19,6 +22,7 @@ namespace {
     // ファイル
     constexpr auto MODEL_FILE = _T("model/character/SDChar.mv1");
     constexpr auto MODEL_GUN_FILE = _T("model/gun/Handgun_fbx_6.1_ASCII.mv1");
+    constexpr auto MODEL_MISSILE_FILE = _T("model/Patriot-Missile-Poland.mv1");
     constexpr auto TEXTURE_FILE_GROUND = _T("texture/Groundplants1_D.jpg");
     constexpr auto TEXTURE_FILE_SPHERE = _T("texture/earth.png");
     constexpr auto TEXTURE_FILE_STEPS = _T("texture/kime-yoko.jpg");
@@ -95,6 +99,39 @@ namespace {
     };
 
         gun->set_update_after(update_gun);
+
+        return true;
+    }
+
+    bool missile_initialize(std::shared_ptr<mv1::missile>& missile, std::shared_ptr<mv1::player>& player) {
+        if (!missile->load(MODEL_MISSILE_FILE) || !missile->initialize(player)) {
+            return false;
+        }
+
+        // スクリーン画面をマウス左クリックしたら 3D 空間の地面位置を取得する処理
+        auto ground = std::make_tuple(math::vector4(), math::vector4(0.0, 1.0, 0.0));
+        auto setup_missile = [missile, ground](posture_base* base)-> void {
+            if (missile->is_stand_by()) {
+                if ((GetMouseInput() & MOUSE_INPUT_LEFT) != 0) {
+                    int x, y;
+
+                    if (GetMousePoint(&x, &y) != -1) {
+                        auto xf = static_cast<float>(x);
+                        auto yf = static_cast<float>(y);
+                        VECTOR world_near = ConvScreenPosToWorldPos(VGet(xf, yf, 0.0f));
+                        VECTOR world_far = ConvScreenPosToWorldPos(VGet(xf, yf, 1.0f));
+                        auto collision = std::make_tuple(false, math::vector4());
+
+                        if (math::utility::collision_plane_line(ground, ToMath(world_near), ToMath(world_far), collision)) {
+                            auto pos = std::get<1>(collision);
+                            missile->set_fire(ToDX(pos));
+                        }
+                    }
+                }
+            }
+        };
+
+        missile->set_update(setup_missile);
 
         return true;
     }
@@ -340,6 +377,21 @@ std::shared_ptr<world::world_base> world_initialize(const int screen_width, cons
 
     if (gun_initialize(gun, player)) {
         world->add_model(gun);
+    }
+#endif
+
+    // ミサイルの処理を追加する
+#if false
+    std::shared_ptr<mv1::missile> missile(new mv1::missile(screen_width, screen_height));
+
+    if (missile_initialize(missile, player)) {
+        world->add_model(missile);
+
+        auto post_render = [missile](void) -> void {
+            missile->separate_render();
+        };
+
+        world->set_post_render(post_render);
     }
 #endif
 
