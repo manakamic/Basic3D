@@ -25,6 +25,7 @@ namespace {
     constexpr auto MODEL_MISSILE_FILE = _T("model/Patriot-Missile-Poland.mv1");
     constexpr auto TEXTURE_FILE_GROUND = _T("texture/Groundplants1_D.jpg");
     constexpr auto TEXTURE_FILE_SPHERE = _T("texture/earth.png");
+    constexpr auto TEXTURE_FILE_EXPLOSION = _T("texture/explosion.png");
     constexpr auto TEXTURE_FILE_STEPS = _T("texture/kime-yoko.jpg");
     constexpr auto TEXTURE_FILE_TREE = _T("texture/tree.png");
 
@@ -40,6 +41,10 @@ namespace {
     constexpr auto SPHERE_RADIUS = 200.0f;
     constexpr auto SPHERE_DIVISION_NUM = 64;
     constexpr auto SPHERE_POSITION_OFFSET = 500.0;
+
+    // îöî≠ÇÃèÓïÒ
+    constexpr auto EXPLOSION_RADIUS = 25.0f;
+    constexpr auto EXPLOSION_DIVISION_NUM = 32;
 
     constexpr auto STEPS_CUBE_NUM = 4;
     std::vector<std::shared_ptr<primitive::cube>> cube_list;
@@ -103,8 +108,16 @@ namespace {
         return true;
     }
 
-    bool missile_initialize(std::shared_ptr<mv1::missile>& missile, std::shared_ptr<mv1::player>& player) {
-        if (!missile->load(MODEL_MISSILE_FILE) || !missile->initialize(player)) {
+    bool missile_initialize(std::shared_ptr<mv1::missile>& missile,
+                            std::shared_ptr<mv1::player>& player,
+                            std::shared_ptr<primitive::sphere>& explosion) {
+        if (!explosion->load(TEXTURE_FILE_EXPLOSION) || !explosion->create()) {
+            return false;
+        }
+
+        explosion->set_invisible(true);
+
+        if (!missile->load(MODEL_MISSILE_FILE) || !missile->initialize(player, explosion)) {
             return false;
         }
 
@@ -383,8 +396,10 @@ std::shared_ptr<world::world_base> world_initialize(const int screen_width, cons
     // É~ÉTÉCÉãÇÃèàóùÇí«â¡Ç∑ÇÈ
 #if false
     std::shared_ptr<mv1::missile> missile(new mv1::missile(screen_width, screen_height));
+    std::shared_ptr<primitive::sphere> explosion(new primitive::sphere(EXPLOSION_RADIUS, EXPLOSION_DIVISION_NUM));
 
-    if (missile_initialize(missile, player)) {
+    if (missile_initialize(missile, player, explosion)) {
+        world->add_primitive(explosion);
         world->add_model(missile);
 
         auto post_render = [missile](void) -> void {

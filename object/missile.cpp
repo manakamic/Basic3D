@@ -1,12 +1,13 @@
 #include <cstring>
 #include <cmath>
 #include "DxLib.h"
+#include "player.h"
+#include "primitive_sphere.h"
+#include "missile.h"
+#include "dx_utility.h"
 #if defined(_AMG_MATH)
 #include "vector4.h"
 #endif
-#include "player.h"
-#include "missile.h"
-#include "dx_utility.h"
 
 namespace {
     constexpr auto model_scale = 0.2; // モデルの描画スケール
@@ -16,8 +17,12 @@ namespace {
     constexpr auto homing_end_y = 50.0; // 着弾判定の Y 値
     constexpr auto default_velocity = 20.0f; // 移動量
     constexpr auto default_homing_rate = 0.2f; // ホーミングする割合
+    constexpr auto explode_add_angle = 15.0; // 爆発の回転
+    constexpr auto explode_multi_scale = 1.075; // 爆発のスケール
+    constexpr auto explode_end_scale = 20.0; // 爆発の最終スケール
     constexpr auto line_width = 10; // 別枠描画用のラインの太さ
-    constexpr auto separate_distance = 2500.0f; // 別枠描画時のモデルとカメラの距離
+    constexpr auto separate_distance = 3250.0f; // 別枠描画時のモデルとカメラの距離
+    constexpr auto warning_text_offset_y = 130.0f; // 警告描画のオフセット値
     constexpr auto text_format = _T("%.2f"); // カウントダウン用
     constexpr auto warning_message = _T("W A R N I N G"); // プレイヤー用の警告
     const auto text_color = GetColor(255, 255, 0); // 文字描画用
@@ -32,12 +37,16 @@ namespace {
     auto base_width = 0;
     auto line_width_pos = 0;
     auto line_height_pos = 0;
+
+    auto explode_angle = 0.0;
+    auto explode_scale = 1.0;
 }
 
 namespace mv1 {
 
     missile::missile(const int screen_width, const int screen_height) : model_base() {
         player = nullptr;
+        explosion = nullptr;
 
         posture = MGetIdent();
         fire_point = VGet(0.0f, 0.0f, 0.0f);
@@ -52,14 +61,17 @@ namespace mv1 {
         this->screen_height = screen_height;
 
         state = state::none;
+
+        is_explosion = false;
     }
 
-    bool missile::initialize(const std::shared_ptr<mv1::player>& player) {
-        if (player == nullptr) {
+    bool missile::initialize(const std::shared_ptr<mv1::player>& player, std::shared_ptr<primitive::sphere>& explosion) {
+        if (player == nullptr || explosion == nullptr) {
             return false;
         }
 
         this->player = player;
+        this->explosion = explosion;
 
         // モデルが大きいのでスケールをかける
 #if defined(_AMG_MATH)
@@ -69,7 +81,6 @@ namespace mv1 {
 #endif
 
         // DrawString 用に描画文字列の半分の横幅を計算する
-        // (SetFontSize には対応していないみたい、、)
         const auto count_down_text = _T("0.00");
 
         count_down.offset_x = GetDrawStringWidth(count_down_text, std::strlen(count_down_text)) / 2;
@@ -144,7 +155,9 @@ namespace mv1 {
 
     void missile::process() {
         model_base::process();
+
         process_fire();
+        process_explosion();
 
         if (count_down.is_valid) {
             process_count_down();
@@ -171,7 +184,9 @@ namespace mv1 {
             set_position(position);
 #endif
             if (homing_end) {
-                state = state::none;
+                state = state::explode;
+                set_explosion();
+
                 player_warning.reset();
                 posture = MGetIdent();
 #if defined(_AMG_MATH)
@@ -182,6 +197,51 @@ namespace mv1 {
                 set_update_posture_matrix(true);
                 set_update_after(nullptr);
             }
+        }
+    }
+
+    void missile::set_explosion() {
+        if (explosion == nullptr) {
+            return;
+        }
+
+        explode_angle = 0.0;
+        explode_scale = 1.0;
+
+#if defined(_AMG_MATH)
+        auto position = get_position();
+
+        explosion->set_position(math::vector4(position.get_x(), 0.0, position.get_z()));
+#else
+        VECTOR position = get_position();
+
+        position.y = 0.0f;
+
+        explosion->set_position(position);
+#endif
+
+        explosion->set_invisible(false);
+    }
+
+    void missile::process_explosion() {
+        if (explosion == nullptr || state != state::explode) {
+            return;
+        }
+
+#if defined(_AMG_MATH)
+        explosion->set_rotation(math::vector4(0.0, explode_angle, 0.0));
+        explosion->set_scale(math::vector4(explode_scale, explode_scale, explode_scale));
+#else
+        explosion->set_rotation(VGet(0.0f, explode_angle, 0.0f));
+        explosion->set_scale(VGet(explode_scale, explode_scale, explode_scale));
+#endif
+
+        explode_angle += explode_add_angle;
+        explode_scale *= explode_multi_scale;
+
+        if (explode_scale > explode_end_scale) {
+            state = state::none;
+            explosion->set_invisible(true);
         }
     }
 
@@ -289,7 +349,7 @@ namespace mv1 {
 #else
         VECTOR player_position = player->get_position();
 #endif
-        VECTOR player_point = VAdd(player_position, VGet(0.0f, 130.0f, 0.0f));
+        VECTOR player_point = VAdd(player_position, VGet(0.0f, warning_text_offset_y, 0.0f));
         auto check = check_in_screen(player_point);
 
         player_warning.is_draw = std::get<0>(check);
@@ -301,7 +361,7 @@ namespace mv1 {
     }
 
     bool missile::render() {
-        if (is_stand_by()) {
+        if (is_stand_by() || is_explode()) {
             return false;
         }
 
@@ -324,7 +384,7 @@ namespace mv1 {
 
     // 別枠描画
     void missile::separate_render() {
-        if (is_stand_by()) {
+        if (is_stand_by() || is_explode()) {
             return;
         }
 
@@ -351,7 +411,7 @@ namespace mv1 {
 #else
         VECTOR camera_target = get_position();
 #endif
-        VECTOR camera_positon = VAdd(camera_target, VGet(separate_distance, separate_distance, separate_distance));
+        VECTOR camera_positon = VAdd(camera_target, VGet(0.0f, separate_distance, -separate_distance));
 
         SetCameraPositionAndTargetAndUpVec(camera_positon, camera_target, VGet(0.0f, 1.0f, 0.0f));
 

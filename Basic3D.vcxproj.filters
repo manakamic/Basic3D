@@ -126,6 +126,9 @@
     <ClCompile Include="object\gun.cpp">
       <Filter>ソース ファイル\object</Filter>
     </ClCompile>
+    <ClCompile Include="object\missile.cpp">
+      <Filter>ソース ファイル\object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\matrix44.h">
@@ -177,6 +180,9 @@
       <Filter>ヘッダー ファイル\object</Filter>
     </ClInclude>
     <ClInclude Include="object\gun.h">
+      <Filter>ヘッダー ファイル\object</Filter>
+    </ClInclude>
+    <ClInclude Include="object\missile.h">
       <Filter>ヘッダー ファイル\object</Filter>
     </ClInclude>
   </ItemGroup>

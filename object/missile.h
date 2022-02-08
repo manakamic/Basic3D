@@ -3,13 +3,14 @@
 #include <tuple>
 #include "model_base.h"
 
-namespace mv1 {
-    class player;
-}
-
 struct tagVECTOR;
 
+namespace primitive {
+    class sphere;
+}
+
 namespace mv1 {
+    class player;
 
     class missile : public model_base {
     public:
@@ -26,14 +27,15 @@ namespace mv1 {
 
         void separate_render();
 
-        bool initialize(const std::shared_ptr<mv1::player>& player);
+        bool initialize(const std::shared_ptr<mv1::player>& player, std::shared_ptr<primitive::sphere>& explosion);
         void set_fire(const VECTOR position);
 
         bool is_stand_by() const { return (state == state::none); }
+        bool is_explode() const { return (state == state::explode); }
 
     private:
         enum class state {
-            none, wait, launch, homing
+            none, wait, launch, homing, explode
         };
 
         struct draw_text {
@@ -55,6 +57,9 @@ namespace mv1 {
 
         std::tuple<bool, int, int> check_in_screen(const VECTOR& position) const;
 
+        void set_explosion();
+
+        void process_explosion();
         void process_count_down();
         void process_player_warning();
         void process_fire();
@@ -67,6 +72,7 @@ namespace mv1 {
         void set_posture(const VECTOR& x, const VECTOR& y, const VECTOR& z);
 
         std::shared_ptr<mv1::player> player;
+        std::shared_ptr<primitive::sphere> explosion;
 
         MATRIX posture;
         VECTOR fire_point;
@@ -84,5 +90,7 @@ namespace mv1 {
         draw_text player_warning;
 
         state state;
+
+        bool is_explosion;
     };
 }
