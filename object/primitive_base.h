@@ -46,6 +46,9 @@ namespace primitive {
         const std::shared_ptr<std::vector<VERTEX3D>>& get_vertex() const { return vertex; }
         const std::shared_ptr<std::vector<unsigned short>>& get_index() const { return index; }
 
+        void set_invisible(const bool invisible) { this->invisible = invisible; };
+        const bool get_invisible() const { return invisible; };
+
         void set_debug(const bool debug) { is_debug = debug; };
         const bool get_debug() const { return is_debug; };
 
@@ -57,6 +60,7 @@ namespace primitive {
         std::shared_ptr<std::vector<VERTEX3D>> vertex;
         std::shared_ptr<std::vector<unsigned short>> index;
 
+        bool invisible;
         bool is_debug;
     };
 }

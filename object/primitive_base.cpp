@@ -23,6 +23,7 @@ namespace primitive {
         vertex.reset(new std::vector<VERTEX3D>());
         index.reset(new std::vector<unsigned short>());
 
+        invisible = false;
         is_debug = false;
     }
 
@@ -60,6 +61,10 @@ namespace primitive {
     }
 
     bool primitive_base::render() {
+        if (invisible) {
+            return false;
+        }
+
         auto vertex_num = static_cast<int>(vertex->size());
         auto index_num = static_cast<int>(index->size());
 

@@ -32,7 +32,11 @@ namespace mv1 {
 
         void process_posture() override;
 
+        void set_invisible(const bool invisible) { this->invisible = invisible; };
+        const bool get_invisible() const { return invisible; };
+
     protected:
         int handle;
+        bool invisible;
     };
 }

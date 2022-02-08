@@ -10,6 +10,7 @@ namespace mv1 {
 
     model_base::model_base() : posture_base(){
         handle = -1;
+        invisible = false;
     }
 
     model_base::~model_base() {
@@ -47,7 +48,7 @@ namespace mv1 {
     }
 
     bool model_base::render() {
-        if (handle == -1) {
+        if (handle == -1 || invisible) {
             return false;
         }
 
