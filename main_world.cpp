@@ -36,6 +36,8 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
         return -1;
     }
 
+    SetFontSize(32);
+
     auto world = world_initialize(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     if (world == nullptr) {
