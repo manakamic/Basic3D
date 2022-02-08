@@ -7,7 +7,7 @@ namespace {
 
 namespace mv1 {
 
-    gun::gun() {
+    gun::gun() : model_base() {
         offset_matrix = MGetIdent();
         target_frame = -1;
     }

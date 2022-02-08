@@ -13,11 +13,11 @@ namespace mv1 {
         gun(const gun&) = default; // コピー
         gun(gun&&) = default; // ムーブ
 
-        virtual bool initialize();
-        virtual bool setup_offset_matrix(std::shared_ptr<mv1::model_base>& target);
-
          // デストラクタ
         virtual ~gun() = default;
+
+        virtual bool initialize();
+        virtual bool setup_offset_matrix(std::shared_ptr<mv1::model_base>& target);
 
         MATRIX get_offset_matrix() const { return offset_matrix; }
         int get_target_frame() const { return target_frame; }
