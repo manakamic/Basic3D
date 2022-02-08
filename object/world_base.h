@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include <functional>
 
 namespace mv1 {
     class model_base;
@@ -40,12 +41,18 @@ namespace world {
         void set_camera_index(const int index) { camera_index = index; }
         int get_camera_index() const { return camera_index; }
 
+        void set_pre_render(const std::function<void(void)>& render) {  pre_render = render; }
+        void set_post_render(const std::function<void(void)>& render) { post_render = render; }
+
     protected:
         std::vector<std::shared_ptr<mv1::model_base>> model_list;
         std::vector<std::shared_ptr<primitive::primitive_base>> primitive_list;
 
         std::vector<std::shared_ptr<camera_base>> camera_list;
         int camera_index;
+
+        std::function<void(void)> pre_render;
+        std::function<void(void)> post_render;
     };
 
 }
