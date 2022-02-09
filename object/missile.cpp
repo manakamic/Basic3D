@@ -1,3 +1,25 @@
+//!
+//! @file missile.h
+//!
+//! @brief ミサイルのモデルを扱うクラス
+//!
+//! @details
+//! ■ ミサイル動作仕様
+//! 発射までは特定時間でカウントダウンを行い、秒の文字列描画も行う
+//! 発射後はミサイル処理が終わるまで player class の座標に 警告の文字描画を行う
+//! 発射後は特定時間まで真上に直進する
+//! 特定時間後は player class の座標にホーミングする
+//! ホーミング処理は 特定の間隔で特定の割合で行う
+//! ホーミング中は特定の高さを下回ると処理を終了する
+//!
+//! ■ ミサイルの姿勢制御
+//! メンバ変数の posture(MATRIX型)の各行の値を
+//! 姿勢制御用のそれぞれの x / y/ z 軸(ベクトル)の値として使用する
+//! (正規直交基底 相当として回転行列として扱う)
+//!
+//! ■ 別描画について
+//! 画面の右上 1/4 の領域に別描画処理を行い、発射中のミサイルの姿勢を見える様にする
+//!
 #include <cstring>
 #include <cmath>
 #include "DxLib.h"
@@ -61,8 +83,6 @@ namespace mv1 {
         this->screen_height = screen_height;
 
         state = state::none;
-
-        is_explosion = false;
     }
 
     bool missile::initialize(const std::shared_ptr<mv1::player>& player, std::shared_ptr<primitive::sphere>& explosion) {
@@ -87,6 +107,7 @@ namespace mv1 {
         player_warning.offset_x = GetDrawStringWidth(warning_message, std::strlen(warning_message)) / 2;
 
         // 別枠描画用の値を計算
+        // 画面の右上で、大きさは画面の 1/4 
         half_width = screen_width / 2;
         half_height = screen_height / 2;
         quarter_width = half_width / 2;
@@ -127,9 +148,12 @@ namespace mv1 {
     // 3D 座標をスクリーン座標に変換
     std::tuple<bool, int, int> missile::check_in_screen(const VECTOR& position) const {
         VECTOR screeen = ConvWorldPosToScreenPos(position);
-        auto in = (screeen.z > 0.0f) && (screeen.z < 1.0f);
         auto x = static_cast<int>(screeen.x);
         auto y = static_cast<int>(screeen.y);
+        auto in_x = (x >= 0) && (x < screen_width);
+        auto in_y = (y >= 0) && (x < screen_height);
+        auto in_z = (screeen.z > 0.0f) && (screeen.z < 1.0f); // ConvWorldPosToScreenPos の仕様
+        auto in = in_x && in_y && in_z;
 
         return std::make_tuple(in, x, y);
     }
@@ -172,6 +196,7 @@ namespace mv1 {
         if (state == state::launch || state == state::homing) {
             VECTOR move = process_moving();
 
+            // ホーミング中に指定の Y 値を下回ったら処理終了の仕様とする
 #if defined(_AMG_MATH)
             auto position = get_position() + ToMath(move);
             auto homing_end = (state == state::homing) && (position.get_y() < homing_end_y);
@@ -187,6 +212,7 @@ namespace mv1 {
                 state = state::explode;
                 set_explosion();
 
+                // 各種初期化(次の発射用)
                 player_warning.reset();
                 posture = MGetIdent();
 #if defined(_AMG_MATH)
@@ -208,6 +234,7 @@ namespace mv1 {
         explode_angle = 0.0;
         explode_scale = 1.0;
 
+        // ホーミング処理が終わったミサイルの XZ 座標で処理する
 #if defined(_AMG_MATH)
         auto position = get_position();
 
@@ -228,6 +255,7 @@ namespace mv1 {
             return;
         }
 
+        // 回転しながら拡大させる
 #if defined(_AMG_MATH)
         explosion->set_rotation(math::vector4(0.0, explode_angle, 0.0));
         explosion->set_scale(math::vector4(explode_scale, explode_scale, explode_scale));
@@ -239,6 +267,7 @@ namespace mv1 {
         explode_angle += explode_add_angle;
         explode_scale *= explode_multi_scale;
 
+        // 指定のスケール値を超えたら爆発終了の仕様とする
         if (explode_scale > explode_end_scale) {
             state = state::none;
             explosion->set_invisible(true);
@@ -254,16 +283,25 @@ namespace mv1 {
             process_moving_homing();
         }
 
+        // 
         return VScale(get_posture_y(), velocity);
     }
 
     // 発射して最初の直進(上昇)処理
     void missile::process_moving_launch() {
+        // 基本的に真上に直進なので何も処理はしない
+        // (現在の姿勢の Y 方向へ velocity 分動くだけなので)
+        // よって launch 終了判定 および homing 処理のセットを行うだけ
         if (get_count() > launch_millisecond) {
             state = state::homing;
             start_count();
 
+            // コールバックでホーミング中の姿勢制御だけを行う
+            // ホーミング処理は process_moving_homing の箇所
             auto update_after = [this](posture_base* base) -> void {
+                // posture_base のマトリクス処理はスケールも含まれるので
+                // initialize でセットした scale 値の計算も行わなければならない
+                // 現在の姿勢を表すメンバ変数の posture は、そのまま回転行列として使える
 #if defined(_AMG_MATH)
                 auto scale = math::matrix44();
                 auto trans = math::matrix44();
@@ -290,6 +328,7 @@ namespace mv1 {
     // ホーミング処理
     void missile::process_moving_homing() {
         if (get_count() > homing_millisecond) {
+            // 自身(ミサイル)から player への単位ベクトルを作成
 #if defined(_AMG_MATH)
             auto player_position = player->get_position();
             auto position = get_position();
@@ -306,8 +345,14 @@ namespace mv1 {
             VECTOR x = get_posture_x();
             VECTOR y = get_posture_y();
             VECTOR z = get_posture_z();
+            // ここがホーミング処理相当
+            // (ミサイルは直進するので姿勢を制御するのがホーミングになる)
+            // 100% の player へのベクトルを適応してしまうと 必ず当たってしまうので
+            // ミサイルの向き( Y 軸)から、player への(向きの)単位ベクトルを結ぶベクトル作成して
+            // そのベクトルを割合(これがホーミングの割合)で小さくして使用する
             VECTOR homing = VScale(VSub(to_player, y), homing_rate);
 
+            // 互いに直交状態の x / y / z 軸を同じ分だけ処理する
             x = VNorm(VAdd(x, homing));
             y = VNorm(VAdd(y, homing));
             z = VNorm(VAdd(z, homing));
@@ -349,6 +394,7 @@ namespace mv1 {
 #else
         VECTOR player_position = player->get_position();
 #endif
+        // player モデルの頭上あたりになるようにオフセットをかける
         VECTOR player_point = VAdd(player_position, VGet(0.0f, warning_text_offset_y, 0.0f));
         auto check = check_in_screen(player_point);
 
@@ -429,6 +475,7 @@ namespace mv1 {
         MV1SetWriteZBuffer(handle, TRUE);
         MV1SetUseZBuffer(handle, TRUE);
 
+        // カメラの設定も戻す
         SetCameraScreenCenter(screen_width * 0.5f, screen_height * 0.5f);
         SetDrawAreaFull();
     }

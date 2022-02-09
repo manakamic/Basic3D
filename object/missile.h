@@ -1,3 +1,9 @@
+//!
+//! @file missile.h
+//!
+//! @brief ミサイルのモデルを扱うクラス
+//!        詳細は missile.cpp 側
+//!
 #pragma once
 #include <memory>
 #include <tuple>
@@ -38,6 +44,8 @@ namespace mv1 {
             none, wait, launch, homing, explode
         };
 
+        // このクラスだけで使用する文字列描画用の構造体
+        // 同じ処理で 違う描画を複数行うのでまとめる
         struct draw_text {
             draw_text() {
                 offset_x = 0; x = 0; y = 0; is_valid = false; is_draw = false;
@@ -90,7 +98,5 @@ namespace mv1 {
         draw_text player_warning;
 
         state state;
-
-        bool is_explosion;
     };
 }
