@@ -11,6 +11,10 @@
 
 struct tagVECTOR;
 
+namespace world {
+    class world_base;
+}
+
 namespace primitive {
     class sphere;
 }
@@ -33,11 +37,15 @@ namespace mv1 {
 
         void separate_render();
 
-        bool initialize(const std::shared_ptr<mv1::player>& player, const std::shared_ptr<primitive::sphere>& explosion);
+        bool initialize(const std::shared_ptr<world::world_base>& world,
+                        const std::shared_ptr<mv1::player>& player,
+                        const std::shared_ptr<primitive::sphere>& explosion);
         void set_fire(const VECTOR position);
 
         bool is_stand_by() const { return (state == state::none); }
         bool is_explode() const { return (state == state::explode); }
+
+        void set_camera_index(const int camera_index) { this->camera_index = camera_index; }
 
     private:
         enum class state {
@@ -79,6 +87,7 @@ namespace mv1 {
         VECTOR get_posture_z() const;
         void set_posture(const VECTOR& x, const VECTOR& y, const VECTOR& z);
 
+        std::shared_ptr<world::world_base> world;
         std::shared_ptr<mv1::player> player;
         std::shared_ptr<primitive::sphere> explosion;
 
@@ -93,6 +102,8 @@ namespace mv1 {
 
         int screen_width;
         int screen_height;
+
+        int camera_index;
 
         draw_text count_down;
         draw_text player_warning;

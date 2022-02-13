@@ -23,6 +23,7 @@
 #include <cstring>
 #include <cmath>
 #include "DxLib.h"
+#include "world_base.h"
 #include "player.h"
 #include "primitive_sphere.h"
 #include "missile.h"
@@ -49,7 +50,6 @@ namespace {
     constexpr auto warning_message = _T("W A R N I N G"); // プレイヤー用の警告
     const auto text_color = GetColor(255, 255, 0); // 文字描画用
     const auto line_color = GetColor(32, 32, 32); // 別枠描画用
-    const auto back_color = GetColor(16, 64, 88); // 別枠描画用
 
     // 別枠描画用の各種 1 度だけ計算すれば良い値
     auto half_width = 0;
@@ -67,6 +67,7 @@ namespace {
 namespace mv1 {
 
     missile::missile(const int screen_width, const int screen_height) : model_base() {
+        world = nullptr;
         player = nullptr;
         explosion = nullptr;
 
@@ -82,14 +83,19 @@ namespace mv1 {
         this->screen_width = screen_width;
         this->screen_height = screen_height;
 
+        camera_index = -1;
+
         state = state::none;
     }
 
-    bool missile::initialize(const std::shared_ptr<mv1::player>& player, const std::shared_ptr<primitive::sphere>& explosion) {
-        if (player == nullptr || explosion == nullptr) {
+    bool missile::initialize(const std::shared_ptr<world::world_base>& world,
+                             const std::shared_ptr<mv1::player>& player,
+                             const std::shared_ptr<primitive::sphere>& explosion) {
+        if (world == nullptr || player == nullptr || explosion == nullptr) {
             return false;
         }
 
+        this->world = world;
         this->player = player;
         this->explosion = explosion;
 
@@ -430,13 +436,7 @@ namespace mv1 {
 
     // 別枠描画
     void missile::separate_render() {
-        if (is_stand_by() || is_explode()) {
-            return;
-        }
-
-        auto handle = get_handle();
-
-        if (handle == -1) {
+        if (world  == nullptr || -1 == camera_index || is_stand_by() || is_explode()) {
             return;
         }
 
@@ -444,36 +444,22 @@ namespace mv1 {
         SetDrawArea(base_width, 0, screen_width, quarter_height);
         SetCameraScreenCenter(base_width + (quarter_width / 2), quarter_height / 2);
 
-        // 背景とする
-        DrawBox(base_width, 0, screen_width, quarter_height, back_color, TRUE);
+        // カメラを切り替える
+        auto now_camera_index = world->get_camera_index();
+
+        world->set_camera_index(camera_index);
+        world->process_camera();
+        world->set_camera_index(now_camera_index);
+
+        // Z バッファをクリアして再描画
+        ClearDrawScreenZBuffer();
+
+        world->render_primitive();
+        world->render_model();
+
+        // 枠描画
         DrawBox(base_width, 0, line_width_pos, quarter_height, line_color, TRUE);
         DrawBox(line_width_pos, line_height_pos, screen_width, quarter_height, line_color, TRUE);
-
-        // モデルを特定の位置から見えカメラをセット
-        // (モデルは原寸大描画での距離を指定)
-#if defined(_AMG_MATH)
-        auto pos = get_position();
-        VECTOR camera_target = ToDX(pos);
-#else
-        VECTOR camera_target = get_position();
-#endif
-        VECTOR camera_positon = VAdd(camera_target, VGet(0.0f, separate_distance, -separate_distance));
-
-        SetCameraPositionAndTargetAndUpVec(camera_positon, camera_target, VGet(0.0f, 1.0f, 0.0f));
-
-        // ZBuffer を OFF にして強制描画
-        MV1SetUseZBuffer(handle, FALSE);
-        MV1SetWriteZBuffer(handle, FALSE);
-
-        SetFogEnable(FALSE);
-
-        MV1DrawModel(handle);
-
-        // 設定を戻す
-        SetFogEnable(TRUE);
-
-        MV1SetWriteZBuffer(handle, TRUE);
-        MV1SetUseZBuffer(handle, TRUE);
 
         // カメラの設定も戻す
         SetCameraScreenCenter(screen_width * 0.5f, screen_height * 0.5f);

@@ -46,6 +46,8 @@ namespace {
     constexpr auto EXPLOSION_RADIUS = 25.0f;
     constexpr auto EXPLOSION_DIVISION_NUM = 32;
 
+    constexpr auto MISSILE_DISTANCE = 3000.0;
+
     constexpr auto STEPS_CUBE_NUM = 4;
     std::vector<std::shared_ptr<primitive::cube>> cube_list;
 
@@ -108,7 +110,9 @@ namespace {
         return true;
     }
 
-    bool missile_initialize(std::shared_ptr<mv1::missile>& missile,
+    bool missile_initialize(const int screen_width, const int screen_height,
+                            std::shared_ptr<mv1::missile>& missile,
+                            std::shared_ptr<world::world_base> world,
                             std::shared_ptr<mv1::player>& player,
                             std::shared_ptr<primitive::sphere>& explosion) {
         if (!explosion->load(TEXTURE_FILE_EXPLOSION) || !explosion->create()) {
@@ -117,7 +121,7 @@ namespace {
 
         explosion->set_invisible(true);
 
-        if (!missile->load(MODEL_MISSILE_FILE) || !missile->initialize(player, explosion)) {
+        if (!missile->load(MODEL_MISSILE_FILE) || !missile->initialize(world, player, explosion)) {
             return false;
         }
 
@@ -145,6 +149,30 @@ namespace {
         };
 
         missile->set_update(setup_missile);
+
+        // ミサイルを別描画するためのカメラ
+        std::shared_ptr<world::camera_base> missile_camera(new world::camera_base(screen_width, screen_height));
+
+        auto update_missile_camera = [missile](world::camera_base* base)-> void {
+            auto pos = missile->get_position();
+
+            base->set_target(pos);
+
+#if defined(_AMG_MATH)
+            pos.add(0.0, MISSILE_DISTANCE, -MISSILE_DISTANCE);
+#else
+            pos.y += MISSILE_DISTANCE;
+            pos.z -= MISSILE_DISTANCE;
+#endif
+
+            base->set_position(pos);
+        };
+
+        missile_camera->set_update(update_missile_camera);
+
+        auto index = world->add_camera(missile_camera);
+
+        missile->set_camera_index(index);
 
         return true;
     }
@@ -394,11 +422,11 @@ std::shared_ptr<world::world_base> world_initialize(const int screen_width, cons
 #endif
 
     // ミサイルの処理を追加する
-#if false
+#if true
     std::shared_ptr<mv1::missile> missile(new mv1::missile(screen_width, screen_height));
     std::shared_ptr<primitive::sphere> explosion(new primitive::sphere(EXPLOSION_RADIUS, EXPLOSION_DIVISION_NUM));
 
-    if (missile_initialize(missile, player, explosion)) {
+    if (missile_initialize(screen_width, screen_height, missile, world, player, explosion)) {
         world->add_primitive(explosion);
         world->add_model(missile);
 
