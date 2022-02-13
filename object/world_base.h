@@ -27,16 +27,15 @@ namespace world {
         virtual void process();
         virtual bool render();
 
+        void process_camera();
+
+        void render_primitive() const;
+        void render_model() const;
+
         void add_model(const std::shared_ptr<mv1::model_base>& model) { model_list.emplace_back(model); }
         void add_primitive(const std::shared_ptr<primitive::primitive_base>& primitive) { primitive_list.emplace_back(primitive); }
 
-        void add_camera(const std::shared_ptr<camera_base>& camera) {
-            camera_list.emplace_back(camera);
-
-            if (camera_index < 0) {
-                camera_index = 0;
-            }
-        }
+        int add_camera(const std::shared_ptr<camera_base>& camera);
 
         void set_camera_index(const int index) { camera_index = index; }
         int get_camera_index() const { return camera_index; }

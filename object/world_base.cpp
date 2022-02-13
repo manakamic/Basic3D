@@ -12,10 +12,26 @@ namespace world {
         post_render = nullptr;
     }
 
-    void world_base::process() {
+    int world_base::add_camera(const std::shared_ptr<camera_base>& camera) {
+        auto index = camera_list.size();
+
+        camera_list.emplace_back(camera);
+
+        if (camera_index < 0) {
+            camera_index = 0;
+        }
+
+        return index;
+    }
+
+    void world_base::process_camera() {
         if (camera_index >= 0 && camera_index < camera_list.size()) {
             camera_list[camera_index]->process();
         }
+    }
+
+    void world_base::process() {
+        process_camera();
 
         for (auto primitive : primitive_list) {
             primitive->process();
@@ -26,18 +42,25 @@ namespace world {
         }
     }
 
+    void world_base::render_primitive() const {
+        for (auto primitive : primitive_list) {
+            primitive->render();
+        }
+    }
+
+    void world_base::render_model() const {
+        for (auto model : model_list) {
+            model->render();
+        }
+    }
+
     bool world_base::render() {
         if (pre_render != nullptr) {
             pre_render();
         }
 
-        for (auto primitive : primitive_list) {
-            primitive->render();
-        }
-
-        for (auto model : model_list) {
-            model->render();
-        }
+        render_primitive();
+        render_model();
 
         if (post_render != nullptr) {
             post_render();
