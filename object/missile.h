@@ -30,22 +30,20 @@ namespace mv1 {
         missile(missile&&) = default; // ムーブ
 
         // デストラクタ
-        virtual ~missile() = default;
+        virtual ~missile();
 
         void process() override;
         bool render() override;
 
-        void separate_render();
-
         bool initialize(const std::shared_ptr<world::world_base>& world,
                         const std::shared_ptr<mv1::player>& player,
                         const std::shared_ptr<primitive::sphere>& explosion);
+
         void set_fire(const VECTOR position);
 
-        bool is_stand_by() const { return (state == state::none); }
-        bool is_explode() const { return (state == state::explode); }
-
         void set_camera_index(const int camera_index) { this->camera_index = camera_index; }
+
+        void set_use_render_texture(const int use_render_texture) { this->use_render_texture = use_render_texture; }
 
     private:
         enum class state {
@@ -68,6 +66,9 @@ namespace mv1 {
             bool is_draw;
         };
 
+        bool initialize_click_screen();
+        bool initialize_camera();
+
         void start_count();
         int get_count() const;
 
@@ -82,10 +83,21 @@ namespace mv1 {
         void process_moving_launch();
         void process_moving_homing();
         VECTOR process_moving();
+
         VECTOR get_posture_x() const;
         VECTOR get_posture_y() const;
         VECTOR get_posture_z() const;
+
         void set_posture(const VECTOR& x, const VECTOR& y, const VECTOR& z);
+
+        void world_process_and_render() const;
+
+        void render_screen();
+        void render_texture();
+        void render_separate();
+
+        bool is_stand_by() const { return (state == state::none); }
+        bool is_explode() const { return (state == state::explode); }
 
         std::shared_ptr<world::world_base> world;
         std::shared_ptr<mv1::player> player;
@@ -104,10 +116,13 @@ namespace mv1 {
         int screen_height;
 
         int camera_index;
+        int render_texture_handle;
 
         draw_text count_down;
         draw_text player_warning;
 
         state state;
+
+        bool use_render_texture;
     };
 }

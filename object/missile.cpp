@@ -19,20 +19,23 @@
 //!
 //! ■ 別描画について
 //! 画面の右上 1/4 の領域に別描画処理を行い、発射中のミサイルの姿勢を見える様にする
+//! テクスチャレンダリングと画面分割描画の 2 つの方法で行える、且つ選べる様に実装
 //!
 #include <cstring>
 #include <cmath>
 #include "DxLib.h"
+#include "camera_base.h"
 #include "world_base.h"
 #include "player.h"
 #include "primitive_sphere.h"
 #include "missile.h"
 #include "dx_utility.h"
-#if defined(_AMG_MATH)
 #include "vector4.h"
-#endif
+#include "utility.h"
 
 namespace {
+    constexpr auto render_texture_camera_distance = 1000.0;
+    constexpr auto render_separate_camera_distance = 3500.0;
     constexpr auto model_scale = 0.2; // モデルの描画スケール
     constexpr auto count_down_millisecond = 5000; // 発射までのカウントダウン
     constexpr auto launch_millisecond = 2000; // 発射後の直進時間
@@ -84,13 +87,23 @@ namespace mv1 {
         this->screen_height = screen_height;
 
         camera_index = -1;
+        render_texture_handle = -1;
 
         state = state::none;
+
+        use_render_texture = true;
+    }
+
+    missile::~missile() {
+        if (-1 != render_texture_handle) {
+            DeleteGraph(render_texture_handle);
+            render_texture_handle = -1;
+        }
     }
 
     bool missile::initialize(const std::shared_ptr<world::world_base>& world,
-                             const std::shared_ptr<mv1::player>& player,
-                             const std::shared_ptr<primitive::sphere>& explosion) {
+        const std::shared_ptr<mv1::player>& player,
+        const std::shared_ptr<primitive::sphere>& explosion) {
         if (world == nullptr || player == nullptr || explosion == nullptr) {
             return false;
         }
@@ -98,6 +111,34 @@ namespace mv1 {
         this->world = world;
         this->player = player;
         this->explosion = explosion;
+
+        if (!initialize_click_screen() || !initialize_camera()) {
+            return false;
+        }
+
+        // 別枠描画用の値を計算
+        // 画面の右上で、大きさは画面の 1/4 
+        half_width = screen_width / 2;
+        half_height = screen_height / 2;
+        quarter_width = half_width / 2;
+        quarter_height = half_height / 2;
+        base_width = half_width + quarter_width;
+        line_width_pos = base_width + line_width;
+        line_height_pos = quarter_height - line_width;
+
+        // テクスチャレンダリング用の画像作成
+        render_texture_handle = MakeScreen(quarter_width, quarter_height);
+
+        if (-1 == render_texture_handle) {
+            return false;
+        }
+
+       // 別画面描画を設定する
+       auto post_render = [this](void) -> void {
+           render_screen();
+       };
+
+       world->set_post_render(post_render);
 
         // モデルが大きいのでスケールをかける
 #if defined(_AMG_MATH)
@@ -112,15 +153,64 @@ namespace mv1 {
         count_down.offset_x = GetDrawStringWidth(count_down_text, std::strlen(count_down_text)) / 2;
         player_warning.offset_x = GetDrawStringWidth(warning_message, std::strlen(warning_message)) / 2;
 
-        // 別枠描画用の値を計算
-        // 画面の右上で、大きさは画面の 1/4 
-        half_width = screen_width / 2;
-        half_height = screen_height / 2;
-        quarter_width = half_width / 2;
-        quarter_height = half_height / 2;
-        base_width = half_width + quarter_width;
-        line_width_pos = base_width + line_width;
-        line_height_pos = quarter_height - line_width;
+        return true;
+    }
+
+    bool missile::initialize_click_screen() {
+        // スクリーン画面をマウス左クリックしたら 3D 空間の地面位置を取得する処理
+        auto ground = std::make_tuple(math::vector4(), math::vector4(0.0, 1.0, 0.0));
+        auto setup_missile = [this, ground](posture_base* base)-> void {
+            if (is_stand_by()) {
+                if ((GetMouseInput() & MOUSE_INPUT_LEFT) != 0) {
+                    int x, y;
+
+                    if (GetMousePoint(&x, &y) != -1) {
+                        auto xf = static_cast<float>(x);
+                        auto yf = static_cast<float>(y);
+                        VECTOR world_near = ConvScreenPosToWorldPos(VGet(xf, yf, 0.0f));
+                        VECTOR world_far = ConvScreenPosToWorldPos(VGet(xf, yf, 1.0f));
+                        auto collision = std::make_tuple(false, math::vector4());
+
+                        if (math::utility::collision_plane_line(ground, ToMath(world_near), ToMath(world_far), collision)) {
+                            auto pos = std::get<1>(collision);
+                            set_fire(ToDX(pos));
+                        }
+                    }
+                }
+            }
+        };
+
+        set_update(setup_missile);
+
+        return true;
+    }
+
+    bool missile::initialize_camera() {
+        // ミサイルを別描画するためのカメラ
+        std::shared_ptr<world::camera_base> missile_camera(new world::camera_base(screen_width, screen_height));
+
+        auto update_missile_camera = [this](world::camera_base* base)-> void {
+            auto pos = get_position();
+
+            base->set_target(pos);
+
+            auto camera_distance = use_render_texture ? render_texture_camera_distance : render_separate_camera_distance;
+
+#if defined(_AMG_MATH)
+            pos.add(0.0, camera_distance, -camera_distance);
+#else
+            pos.y += camera_distance;
+            pos.z -= camera_distance;
+#endif
+
+            base->set_position(pos);
+        };
+
+        missile_camera->set_update(update_missile_camera);
+
+        auto index = world->add_camera(missile_camera);
+
+        set_camera_index(index);
 
         return true;
     }
@@ -157,7 +247,7 @@ namespace mv1 {
         auto x = static_cast<int>(screeen.x);
         auto y = static_cast<int>(screeen.y);
         auto in_x = (x >= 0) && (x < screen_width);
-        auto in_y = (y >= 0) && (x < screen_height);
+        auto in_y = (y >= 0) && (y < screen_height);
         auto in_z = (screeen.z > 0.0f) && (screeen.z < 1.0f); // ConvWorldPosToScreenPos の仕様
         auto in = in_x && in_y && in_z;
 
@@ -370,26 +460,24 @@ namespace mv1 {
 
     void missile::process_count_down() {
         auto check = check_in_screen(fire_point);
+
         count_down.is_draw = std::get<0>(check);
+        count_down.x = std::get<1>(check);
+        count_down.y = std::get<2>(check);
 
-        if (count_down.is_draw) {
-            count_down.x = std::get<1>(check);
-            count_down.y = std::get<2>(check);
+        auto count_down = count_down_millisecond - get_count();
+        count_down_time = count_down / 1000.0f; // 秒へ変換
 
-            auto count_down = count_down_millisecond - get_count();
-            count_down_time = count_down / 1000.0f; // 秒へ変換
+        if (count_down < 0) {
+            count_down_time = 0.0f;
 
-            if (count_down < 0) {
-                count_down_time = 0.0f;
+            this->count_down.reset();
 
-                this->count_down.reset();
+            player_warning.is_valid = true;
 
-                player_warning.is_valid = true;
+            state = state::launch;
 
-                state = state::launch;
-
-                start_count();
-            }
+            start_count();
         }
     }
 
@@ -405,11 +493,8 @@ namespace mv1 {
         auto check = check_in_screen(player_point);
 
         player_warning.is_draw = std::get<0>(check);
-
-        if (player_warning.is_draw) {
-            player_warning.x = std::get<1>(check);
-            player_warning.y = std::get<2>(check);
-        }
+        player_warning.x = std::get<1>(check);
+        player_warning.y = std::get<2>(check);
     }
 
     bool missile::render() {
@@ -435,15 +520,24 @@ namespace mv1 {
     }
 
     // 別枠描画
-    void missile::separate_render() {
+    void missile::render_screen() {
         if (world  == nullptr || -1 == camera_index || is_stand_by() || is_explode()) {
             return;
         }
 
-        // 画面の右上(全体の1/4サイズ)を描画対象にする設定
-        SetDrawArea(base_width, 0, screen_width, quarter_height);
-        SetCameraScreenCenter(base_width + (quarter_width / 2), quarter_height / 2);
+        if (use_render_texture) {
+            render_texture();
+        }
+        else {
+            render_separate();
+        }
 
+        // 枠描画
+        DrawBox(base_width, 0, line_width_pos, quarter_height, line_color, TRUE);
+        DrawBox(line_width_pos, line_height_pos, screen_width, quarter_height, line_color, TRUE);
+    }
+
+    void missile::world_process_and_render() const {
         // カメラを切り替える
         auto now_camera_index = world->get_camera_index();
 
@@ -451,15 +545,34 @@ namespace mv1 {
         world->process_camera();
         world->set_camera_index(now_camera_index);
 
+        world->render_primitive();
+        world->render_model();
+    }
+
+    void missile::render_texture() {
+        if (-1 == render_texture_handle) {
+            return;
+        }
+
+        // レンダリングターゲットをテクスチャにする
+        SetDrawScreen(render_texture_handle);
+        ClearDrawScreen();
+
+        world_process_and_render();
+
+        // ターゲットをバックバッファに戻して、レンダリングしたテクスチャを使用して描画
+        SetDrawScreen(DX_SCREEN_BACK);
+        DrawExtendGraph(base_width, 0, screen_width, quarter_height, render_texture_handle, FALSE);
+    }
+
+    void missile::render_separate() {
+        // 画面の右上(全体の1/4サイズ)を描画対象にする設定
+        SetDrawArea(base_width, 0, screen_width, quarter_height);
+        SetCameraScreenCenter(base_width + (quarter_width / 2), quarter_height / 2);
         // Z バッファをクリアして再描画
         ClearDrawScreenZBuffer();
 
-        world->render_primitive();
-        world->render_model();
-
-        // 枠描画
-        DrawBox(base_width, 0, line_width_pos, quarter_height, line_color, TRUE);
-        DrawBox(line_width_pos, line_height_pos, screen_width, quarter_height, line_color, TRUE);
+        world_process_and_render();
 
         // カメラの設定も戻す
         SetCameraScreenCenter(screen_width * 0.5f, screen_height * 0.5f);

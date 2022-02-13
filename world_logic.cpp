@@ -46,8 +46,6 @@ namespace {
     constexpr auto EXPLOSION_RADIUS = 25.0f;
     constexpr auto EXPLOSION_DIVISION_NUM = 32;
 
-    constexpr auto MISSILE_DISTANCE = 3000.0;
-
     constexpr auto STEPS_CUBE_NUM = 4;
     std::vector<std::shared_ptr<primitive::cube>> cube_list;
 
@@ -124,55 +122,6 @@ namespace {
         if (!missile->load(MODEL_MISSILE_FILE) || !missile->initialize(world, player, explosion)) {
             return false;
         }
-
-        // スクリーン画面をマウス左クリックしたら 3D 空間の地面位置を取得する処理
-        auto ground = std::make_tuple(math::vector4(), math::vector4(0.0, 1.0, 0.0));
-        auto setup_missile = [missile, ground](posture_base* base)-> void {
-            if (missile->is_stand_by()) {
-                if ((GetMouseInput() & MOUSE_INPUT_LEFT) != 0) {
-                    int x, y;
-
-                    if (GetMousePoint(&x, &y) != -1) {
-                        auto xf = static_cast<float>(x);
-                        auto yf = static_cast<float>(y);
-                        VECTOR world_near = ConvScreenPosToWorldPos(VGet(xf, yf, 0.0f));
-                        VECTOR world_far = ConvScreenPosToWorldPos(VGet(xf, yf, 1.0f));
-                        auto collision = std::make_tuple(false, math::vector4());
-
-                        if (math::utility::collision_plane_line(ground, ToMath(world_near), ToMath(world_far), collision)) {
-                            auto pos = std::get<1>(collision);
-                            missile->set_fire(ToDX(pos));
-                        }
-                    }
-                }
-            }
-        };
-
-        missile->set_update(setup_missile);
-
-        // ミサイルを別描画するためのカメラ
-        std::shared_ptr<world::camera_base> missile_camera(new world::camera_base(screen_width, screen_height));
-
-        auto update_missile_camera = [missile](world::camera_base* base)-> void {
-            auto pos = missile->get_position();
-
-            base->set_target(pos);
-
-#if defined(_AMG_MATH)
-            pos.add(0.0, MISSILE_DISTANCE, -MISSILE_DISTANCE);
-#else
-            pos.y += MISSILE_DISTANCE;
-            pos.z -= MISSILE_DISTANCE;
-#endif
-
-            base->set_position(pos);
-        };
-
-        missile_camera->set_update(update_missile_camera);
-
-        auto index = world->add_camera(missile_camera);
-
-        missile->set_camera_index(index);
 
         return true;
     }
@@ -422,19 +371,13 @@ std::shared_ptr<world::world_base> world_initialize(const int screen_width, cons
 #endif
 
     // ミサイルの処理を追加する
-#if true
+#if false
     std::shared_ptr<mv1::missile> missile(new mv1::missile(screen_width, screen_height));
     std::shared_ptr<primitive::sphere> explosion(new primitive::sphere(EXPLOSION_RADIUS, EXPLOSION_DIVISION_NUM));
 
     if (missile_initialize(screen_width, screen_height, missile, world, player, explosion)) {
         world->add_primitive(explosion);
         world->add_model(missile);
-
-        auto post_render = [missile](void) -> void {
-            missile->separate_render();
-        };
-
-        world->set_post_render(post_render);
     }
 #endif
 
