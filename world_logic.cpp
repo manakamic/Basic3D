@@ -101,7 +101,7 @@ namespace {
 #else
             base->set_posture_matrix(posture);
 #endif
-    };
+        };
 
         gun->set_update_after(update_gun);
 
