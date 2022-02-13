@@ -33,7 +33,7 @@ namespace mv1 {
 
         void separate_render();
 
-        bool initialize(const std::shared_ptr<mv1::player>& player, std::shared_ptr<primitive::sphere>& explosion);
+        bool initialize(const std::shared_ptr<mv1::player>& player, const std::shared_ptr<primitive::sphere>& explosion);
         void set_fire(const VECTOR position);
 
         bool is_stand_by() const { return (state == state::none); }
