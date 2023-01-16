@@ -62,8 +62,8 @@ namespace primitive {
                     v.norm = VNorm(pos);
                     v.dif = DEFAULT_DIFFUSE;
                     v.spc = DEFAULT_SPECULAR;
-                    v.u = angle_y_list[i] / PI2_ANGLE;
-                    v.v = angle_x_list[i] / PI_ANGLE;
+                    v.u = 1.0f - angle_y_list[i] / PI2_ANGLE;
+                    v.v = 1.0f - angle_x_list[i] / PI_ANGLE;
 
                     vertex->emplace_back(std::move(v));
                 }
