@@ -78,9 +78,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -253,6 +257,8 @@
     <ClCompile Include="math\utility.cpp" />
     <ClCompile Include="math\vector4.cpp" />
     <ClCompile Include="object\camera_base.cpp" />
+    <ClCompile Include="object\fade.cpp" />
+    <ClCompile Include="object\fade_camera.cpp" />
     <ClCompile Include="object\gun.cpp" />
     <ClCompile Include="object\missile.cpp" />
     <ClCompile Include="object\model.cpp" />
@@ -278,6 +284,8 @@
     <ClInclude Include="math\utility.h" />
     <ClInclude Include="math\vector4.h" />
     <ClInclude Include="object\camera_base.h" />
+    <ClInclude Include="object\fade.h" />
+    <ClInclude Include="object\fade_camera.h" />
     <ClInclude Include="object\gun.h" />
     <ClInclude Include="object\missile.h" />
     <ClInclude Include="object\model.h" />
