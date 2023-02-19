@@ -1,0 +1,3 @@
+ShaderCompiler.exe /Tvs_4_0 vertex_shader_transition.hlsl
+ShaderCompiler.exe /Tps_4_0 pixel_shader_transition.hlsl
+pause
