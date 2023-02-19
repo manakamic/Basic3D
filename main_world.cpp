@@ -1,14 +1,15 @@
 //!
 //! @file main_world.cpp
 //!
-//! @brief 3D ƒ‚ƒfƒ‹‚ğ“Ç‚İ‚İAƒvƒŠƒ~ƒeƒBƒu‚Ìì¬‚Æ•`‰æAŠeí“–‚½‚è”»’è‚ğs‚¤ƒTƒ“ƒvƒ‹
+//! @brief 3D ãƒ¢ãƒ‡ãƒ«ã‚’èª­ã¿è¾¼ã¿ã€ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–ã®ä½œæˆã¨æç”»ã€å„ç¨®å½“ãŸã‚Šåˆ¤å®šã‚’è¡Œã†ã‚µãƒ³ãƒ—ãƒ«
 //!        world_base class / world_logic.cpp
 //!        camera_base class / camera_logic.cpp
-//!        ‚ğ—pˆÓ‚µ‚Ä 3D ¢ŠE‚ÌƒVƒXƒeƒ€‚ğ\’z
+//!        ã‚’ç”¨æ„ã—ã¦ 3D ä¸–ç•Œã®ã‚·ã‚¹ãƒ†ãƒ ã‚’æ§‹ç¯‰
 //!
 #include "DxLib.h"
 #include "world_logic.h"
 #include "world_base.h"
+#include "fade.h"
 
 namespace {
     constexpr auto WINDOW_TITLE = _T("Basic 3D");
@@ -45,6 +46,14 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
         return -1;
     }
 
+    // Shader ã‚’ä½¿ç”¨ã—ãŸãƒ•ã‚§ãƒ¼ãƒ‰
+    std::unique_ptr<mv1::fade> fade(new mv1::fade());
+
+    if (!fade->initialize(SCREEN_WIDTH, SCREEN_HEIGHT)) {
+        DxLib_End();
+        return -1;
+    }
+
     SetUseZBuffer3D(TRUE);
     SetWriteZBuffer3D(TRUE);
 
@@ -55,7 +64,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
     SetDrawScreen(DX_SCREEN_BACK);
 
-    // •ÀsŒõŒ¹‚ğ 1 ‚Â’Ç‰Á‚·‚é
+    // ä¸¦è¡Œå…‰æºã‚’ 1 ã¤è¿½åŠ ã™ã‚‹
     VECTOR light_dir = VGet(-1.0f, -1.0f, -1.0f);
     auto light_handle = CreateDirLightHandle(light_dir);
 
@@ -64,16 +73,28 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
             break;
         }
 
+        if (1 == CheckHitKey(KEY_INPUT_I)) {
+            // ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³
+            fade->set_fade_in(2000);
+        }
+
+        if (1 == CheckHitKey(KEY_INPUT_O)) {
+            // ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆ
+            fade->set_fade_out(2000);
+        }
+
         world->process();
+        fade->process();
 
         ClearDrawScreen();
 
         world->render();
+        fade->render();
 
         ScreenFlip();
     }
 
-    // ì¬‚µ‚½ŒõŒ¹‚Ì”jŠü
+    // ä½œæˆã—ãŸå…‰æºã®ç ´æ£„
     DeleteLightHandle(light_handle);
 
     DxLib_End();
