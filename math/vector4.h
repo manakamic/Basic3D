@@ -18,13 +18,13 @@ namespace math {
         vector4& operator =(const vector4&) = default; // コピー
         vector4& operator =(vector4&&) = default; // ムーブ
 
-        const vector4 operator +(const vector4& rhs) const;
-        const vector4 operator -(const vector4& rhs) const;
+        vector4 operator +(const vector4& rhs) const;
+        vector4 operator -(const vector4& rhs) const;
 
-        const vector4 operator *(const double rhs) const;
-        const vector4 operator /(const double rhs) const;
+        vector4 operator *(const double rhs) const;
+        vector4 operator /(const double rhs) const;
 
-        const vector4 operator *(const matrix44 rhs) const;
+        vector4 operator *(const matrix44 rhs) const;
 
         void set(const vector4& vector);
         void set(const double x, const double y, const double z);
@@ -32,18 +32,18 @@ namespace math {
         void add(const vector4& vector);
         void add(const double x, const double y, const double z);
 
-        const double get_x() const { return x; }
-        const double get_y() const { return y; }
-        const double get_z() const { return z; }
-        const double get_w() const { return w; }
+        double get_x() const { return x; }
+        double get_y() const { return y; }
+        double get_z() const { return z; }
+        double get_w() const { return w; }
 
-        const double lenght() const;
+        double length() const;
 
         void normalized();
-        const vector4 normalize() const;
+        vector4 normalize() const;
 
-        const double dot(const vector4& rhs) const;
-        const vector4 cross(const vector4& rhs) const;
+        double dot(const vector4& rhs) const;
+        vector4 cross(const vector4& rhs) const;
 
     private:
         double x;
