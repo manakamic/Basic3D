@@ -25,29 +25,29 @@ namespace math {
         matrix44& operator =(const matrix44&) = default; // コピー
         matrix44& operator =(matrix44&&) = default; // ムーブ
 
-        const matrix44 operator *(const matrix44 rhs) const;
-        const matrix44 operator +(const vector4 rhs) const;
+        matrix44 operator *(const matrix44 rhs) const;
+        matrix44 operator +(const vector4 rhs) const;
 
-        const double get_value(const int row, const int column) const { return row_column[row][column]; }
-        const void set_value(const int row, const int column, const double value) { row_column[row][column] = value; }
+        double get_value(const int row, const int column) const { return row_column[row][column]; }
+        void set_value(const int row, const int column, const double value) { row_column[row][column] = value; }
 
         void zero(matrix_array& target) const;
         void unit();
 
-        const double determinant() const;
-        const matrix44 get_inverse() const;
+        double determinant() const;
+        matrix44 get_inverse() const;
 
         void look_at(const vector4& position, const vector4& target, const vector4& up);
         void perspective(const double fov_y, const double aspect, const double near_z, const double far_z);
         void viewport(const double width, const double height);
 
-        void transfer(const double x, const double y, const double z, bool make);
-        void scale(const double x, const double y, const double z, bool make);
-        void rotate_x(const double degree, bool make);
-        void rotate_y(const double degree, bool make);
-        void rotate_z(const double degree, bool make);
+        void transfer(const double x, const double y, const double z, const bool make);
+        void scale(const double x, const double y, const double z, const bool make);
+        void rotate_x(const double degree, const bool make);
+        void rotate_y(const double degree, const bool make);
+        void rotate_z(const double degree, const bool make);
 
-        const matrix44 get_rotate() const;
+        matrix44 get_rotate() const;
 
     private:
         std::tuple<double, double> get_sin_cos(const double degree) const;

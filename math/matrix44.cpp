@@ -27,7 +27,7 @@ namespace math {
         }
     }
 
-    const double matrix44::determinant() const {
+    double matrix44::determinant() const {
         // è„éOäpçsóÒÇçÏê¨ÇµÇƒçsóÒéÆÇãÅÇﬂÇÈ
         matrix_array upper_triangular = row_column;
 
@@ -54,7 +54,7 @@ namespace math {
         return determinant;
     }
 
-    const matrix44 matrix44::get_inverse() const {
+    matrix44 matrix44::get_inverse() const {
         // ë|Ç´èoÇµñ@Ç…ÇÊÇÈãtçsóÒÇÃåvéZ
         matrix_array inverse{ {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}} };
         matrix_array temporary = row_column;
@@ -116,22 +116,22 @@ namespace math {
     }
 
     void matrix44::perspective(const double fov_y, const double aspect, const double near_z, const double far_z) {
-        auto cot = 1.0 / tan(fov_y * 0.5);
-        auto range = far_z - near_z;
-        auto temp = far_z / range;
+        const auto cot = 1.0 / tan(fov_y * 0.5);
+        const auto range = far_z - near_z;
+        const auto temp = far_z / range;
 
         zero(row_column);
 
         row_column[0][0] = cot * aspect;
         row_column[1][1] = cot;
         row_column[2][2] = temp;
-        row_column[2][3] = 1.0f;
+        row_column[2][3] = 1.0;
         row_column[3][2] = -near_z * temp;
     }
 
     void matrix44::viewport(const double width, const double height) {
-        auto w = width  * 0.5;
-        auto h = height * 0.5;
+        const auto w = width  * 0.5;
+        const auto h = height * 0.5;
 
         unit();
 
@@ -141,7 +141,7 @@ namespace math {
         row_column[3][1] =  h;
     }
 
-    const matrix44 matrix44::operator *(const matrix44 rhs) const {
+    matrix44 matrix44::operator *(const matrix44 rhs) const {
         matrix_array result{ {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}} };
 
         for (auto i = 0; i < column_max; ++i) {
@@ -159,7 +159,7 @@ namespace math {
         return matrix44(result);
     }
 
-    const matrix44 matrix44::operator +(const vector4 rhs) const {
+    matrix44 matrix44::operator +(const vector4 rhs) const {
         matrix_array result = row_column;
 
         result[3][0] += rhs.get_x();
@@ -169,7 +169,7 @@ namespace math {
         return matrix44(result);
     }
 
-    void matrix44::transfer(const double x, const double y, const double z, bool make) {
+    void matrix44::transfer(const double x, const double y, const double z, const bool make) {
         if (make) {
             unit();
         }
@@ -179,7 +179,7 @@ namespace math {
         row_column[3][2] += z;
     }
 
-    void matrix44::scale(const double x, const double y, const double z, bool make) {
+    void matrix44::scale(const double x, const double y, const double z, const bool make) {
         if (make) {
             unit();
         }
@@ -189,10 +189,10 @@ namespace math {
         row_column[2][2] *= z;
     }
 
-    void matrix44::rotate_x(const double degree, bool make) {
-        auto sin_cos = get_sin_cos(degree);
-        auto sin = std::get<0>(sin_cos);
-        auto cos = std::get<1>(sin_cos);
+    void matrix44::rotate_x(const double degree, const bool make) {
+        const auto sin_cos = get_sin_cos(degree);
+        const auto sin = std::get<0>(sin_cos);
+        const auto cos = std::get<1>(sin_cos);
 
         if (make) {
             unit();
@@ -210,10 +210,10 @@ namespace math {
         }
     }
 
-    void matrix44::rotate_y(const double degree, bool make) {
-        auto sin_cos = get_sin_cos(degree);
-        auto sin = std::get<0>(sin_cos);
-        auto cos = std::get<1>(sin_cos);
+    void matrix44::rotate_y(const double degree, const bool make) {
+        const auto sin_cos = get_sin_cos(degree);
+        const auto sin = std::get<0>(sin_cos);
+        const auto cos = std::get<1>(sin_cos);
 
         if (make) {
             unit();
@@ -231,10 +231,10 @@ namespace math {
         }
     }
 
-    void matrix44::rotate_z(const double degree, bool make) {
-        auto sin_cos = get_sin_cos(degree);
-        auto sin = std::get<0>(sin_cos);
-        auto cos = std::get<1>(sin_cos);
+    void matrix44::rotate_z(const double degree, const bool make) {
+        const auto sin_cos = get_sin_cos(degree);
+        const auto sin = std::get<0>(sin_cos);
+        const auto cos = std::get<1>(sin_cos);
 
         if (make) {
             unit();
@@ -252,7 +252,7 @@ namespace math {
         }
     }
 
-    const matrix44 matrix44::get_rotate() const {
+    matrix44 matrix44::get_rotate() const {
         matrix_array none_transfer = row_column;
 
         none_transfer[3][0] = 0.0;
@@ -263,7 +263,7 @@ namespace math {
     }
 
     std::tuple<double, double> matrix44::get_sin_cos(const double degree) const {
-        auto radian = utility::degree_to_radian(degree);
+        const auto radian = utility::degree_to_radian(degree);
 
         return std::make_tuple(std::sin(radian), std::cos(radian));
     }
