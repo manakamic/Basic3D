@@ -31,9 +31,9 @@ void posture_base::process_posture() {
 
 #if defined(_AMG_MATH)
     scale_matrix.scale(scale.get_x(), scale.get_y(), scale.get_z(), true);
-    rotate_matrix.rotate_z(rotation.get_z(), true);
-    rotate_matrix.rotate_x(rotation.get_x(), false);
+    rotate_matrix.rotate_x(rotation.get_x(), true);
     rotate_matrix.rotate_y(rotation.get_y(), false);
+    rotate_matrix.rotate_z(rotation.get_z(), false);
     transfer_matrix.transfer(position.get_x(), position.get_y(), position.get_z(), true);
 
     if (update_posture_matrix) {
@@ -43,9 +43,12 @@ void posture_base::process_posture() {
     auto radian_x = rotation.x * DEGREE_TO_RADIAN;
     auto radian_y = rotation.y * DEGREE_TO_RADIAN;
     auto radian_z = rotation.z * DEGREE_TO_RADIAN;
+    auto rot_x = MGetRotX(radian_x);
+    auto rot_y = MGetRotY(radian_y);
+    auto rot_z = MGetRotZ(radian_z);
 
     scale_matrix = MGetScale(scale);
-    rotate_matrix = MMult(MMult(MGetRotZ(radian_z), MGetRotX(radian_x)), MGetRotY(radian_y));
+    rotate_matrix = MMult(MMult(rot_x, rot_y), rot_z);
     transfer_matrix = MGetTranslate(position);
 
     if (update_posture_matrix) {
