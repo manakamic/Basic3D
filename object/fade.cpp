@@ -2,6 +2,9 @@
 #include "DxLib.h"
 #include "fade_camera.h"
 #include "fade.h"
+#if defined(_AMG_MATH)
+#include "vector4.h"
+#endif
 
 namespace {
     constexpr auto MODEL_FILE = _T("model/fade/transition.mv1");
@@ -75,8 +78,12 @@ namespace mv1 {
             return false;
         }
 
-        // transition.mv1 は 100 x 100 サイズの頂点なので画面サイズ 1280x720 の比率で横に伸ばす
+        // transition.mv1 �� 100 x 100 �̒��_���f���Ȃ̂ŁA��ʂ̔䗦 1280 x 720 �ɍ��킹�ăX�P�[�����O����
+#if defined(_AMG_MATH)
+        set_scale(math::vector4(1.78, 1.0, 1.0));
+#else
         set_scale(VGet(1.78f, 1.0f, 1.0f));
+#endif
 
         vertex_shder_handle = LoadVertexShader(VERTEX_SHADER_FILE);
         pixel_shader_handle = LoadPixelShader(PIXEL_SHADER_FILE);
@@ -225,22 +232,18 @@ namespace mv1 {
             return false;
         }
 
-        // シェーダーを有効にしたモデル描画
         MV1SetUseOrigShader(TRUE);
 
-        // シェーダーを適応
         SetUseVertexShader(vertex_shder_handle);
         SetUsePixelShader(pixel_shader_handle);
 
         if (!camera->is_ortho()) {
-            // Z バッファを無効化
             MV1SetUseZBuffer(handle, FALSE);
             MV1SetWriteZBuffer(handle, FALSE);
         }
 
         auto ret = MV1DrawModel(handle);
 
-        // 他の描画に影響が出ない様に戻す
         MV1SetUseOrigShader(FALSE);
 
         return (-1 != ret);

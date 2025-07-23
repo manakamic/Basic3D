@@ -11,12 +11,10 @@ namespace mv1 {
 
     class fade : public model_base {
     public:
-        // コンストラクタ
         fade();
-        fade(const fade&) = default; // コピー
-        fade(fade&&) = default; // ムーブ
+        fade(const fade&) = default;
+        fade(fade&&) = default;
 
-        // デストラクタ
         virtual ~fade();
 
         bool initialize(int screen_width, int screen_height);
