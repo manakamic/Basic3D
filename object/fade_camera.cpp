@@ -22,7 +22,11 @@ namespace world {
             update(this);
         }
 
+#if defined(_AMG_MATH)
         SetCameraPositionAndTargetAndUpVec(ToDX(position), ToDX(target), ToDX(up));
+#else
+        SetCameraPositionAndTargetAndUpVec(position, target, up);
+#endif
         SetCameraNearFar(near_value, far_value);
 
         if (ortho) {
