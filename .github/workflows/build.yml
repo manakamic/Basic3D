@@ -1,0 +1,78 @@
+name: Manual Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build Type'
+        required: true
+        default: 'Debug'
+        type: choice
+        options:
+        - Debug
+        - Release
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+    env:
+      PACKAGE_DIR: release_package # パッケージ化用ディレクトリ名を指定
+
+    steps:
+      # リポジトリのソースコードをチェックアウト
+      - name: Checkout Main Repository
+        uses: actions/checkout@v4
+
+      # DXライブラリのリポジトリをチェックアウトして 'dxlib' フォルダに配置
+      - name: Checkout DxLib Repository
+        uses: actions/checkout@v4
+        with:
+          repository: m-manaka/DX-Library
+          lfs: true
+          path: dxlib
+
+      # MSBuildをセットアップ
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      # MSBuildでプロジェクトをビルド
+      - name: Build with MSBuild
+        run: msbuild Basic3D.sln /p:Configuration=${{ github.event.inputs.build_type }} /p:Platform=x64
+
+      # Debugビルドの場合
+      - name: Upload Debug Artifact
+        if: github.event.inputs.build_type == 'Debug'
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-build-${{ github.run_id }}
+          path: |
+            x64/Debug/Basic3D.exe
+            model
+            model_original
+            shader
+            texture
+
+
+      # Releaseビルドの場合
+      - name: Package Release Build
+        if: github.event.inputs.build_type == 'Release'
+        run: |
+          New-Item -ItemType Directory -Force -Path $env:PACKAGE_DIR
+          Copy-Item -Path "x64/Release/Basic3D.exe" -Destination $env:PACKAGE_DIR
+          Copy-Item -Path "model" -Destination $env:PACKAGE_DIR -Recurse
+          Copy-Item -Path "model_original" -Destination $env:PACKAGE_DIR -Recurse
+          Copy-Item -Path "shader" -Destination $env:PACKAGE_DIR -Recurse
+          Copy-Item -Path "texture" -Destination $env:PACKAGE_DIR -Recurse
+          Compress-Archive -Path "$env:PACKAGE_DIR/*" -Destination "${{ github.event.repository.name }}-release.zip"
+
+      # GitHub Releases にアップロード
+      - name: Create Release
+        if: github.event.inputs.build_type == 'Release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "${{ github.event.repository.name }}-release.zip"
+          tag_name: "release-${{ github.run_id }}-${{ github.run_attempt }}"
+          name: "Release ${{ github.run_id }}"
+          body: "Automated release created by GitHub Actions."
+          draft: false
+          prerelease: false
