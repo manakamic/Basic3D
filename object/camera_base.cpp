@@ -23,7 +23,7 @@ namespace world {
         near_value = DEFAULT_NEAR;
         far_value = DEFAULT_FAR;
         fov = math::utility::degree_to_radian(DEFAULT_FOV_ANGLE);
-        aspect = static_cast<double>(screen_height) / static_cast<double>(screen_width);
+        aspect = static_cast<double>(screen_width) / static_cast<double>(screen_height);
 
 #if defined(_AMG_MATH)
         position = math::vector4(0.0, 0.0, DEFAULT_POSITION_Z);

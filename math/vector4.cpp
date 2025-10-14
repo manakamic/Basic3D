@@ -49,11 +49,16 @@ namespace math {
 
     vector4 vector4::normalize() const {
         const auto len = length();
-        const auto nx = x / len;
-        const auto ny = y / len;
-        const auto nz = z / len;
 
-        return vector4(nx, ny, nz);
+        if (len > 0.0) {
+            const auto nx = x / len;
+            const auto ny = y / len;
+            const auto nz = z / len;
+
+            return vector4(nx, ny, nz);
+        }
+
+        return vector4(x, y, z);
     }
 
     double vector4::dot(const vector4& rhs) const {

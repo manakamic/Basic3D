@@ -67,14 +67,14 @@ namespace math {
     bool utility::inside_triangle_point(const vector4& triangle_point0, const vector4& triangle_point1, const vector4& triangle_point2, const vector4& point) {
         const auto v01 = triangle_point1 - triangle_point0;
         const auto v12 = triangle_point2 - triangle_point1;
-        const auto v21 = triangle_point0 - triangle_point2;
+        const auto v20 = triangle_point0 - triangle_point2;
         const auto v0p = point - triangle_point0;
         const auto v1p = point - triangle_point1;
         const auto v2p = point - triangle_point2;
 
-        auto c0 = v01.cross(v1p);
-        auto c1 = v12.cross(v2p);
-        auto c2 = v21.cross(v0p);
+        auto c0 = v01.cross(v0p);
+        auto c1 = v12.cross(v1p);
+        auto c2 = v20.cross(v2p);
 
         c0.normalized();
         c1.normalized();
