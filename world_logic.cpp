@@ -56,7 +56,7 @@ namespace {
 
     auto sphere_angle = 0.0;
 
-    std::shared_ptr<world::camera_base> camera = nullptr;
+    std::optional<std::shared_ptr<world::camera_base>> camera = std::nullopt;
 
     bool player_initialize(std::shared_ptr<mv1::player>& player) {
 
@@ -193,7 +193,7 @@ namespace {
         auto handle = -1;
 
         for (auto i = 0; i < STEPS_CUBE_NUM; ++i) {
-            std::shared_ptr<primitive::cube> cube(new primitive::cube(cube_size));
+            auto cube = std::make_shared<primitive::cube>(cube_size);
 
             if (handle == -1) {
                 if (!cube->load(TEXTURE_FILE_STEPS)) {
@@ -246,7 +246,7 @@ namespace {
         auto handle = -1;
 
         for (auto i = 0; i < TREE_NUM; ++i) {
-            std::shared_ptr<primitive::plane> plane(new primitive::plane(TREE_SIZE, TREE_DIVISION_NUM));
+            auto plane = std::make_shared<primitive::plane>(TREE_SIZE, TREE_DIVISION_NUM);
 
             if (handle == -1) {
                 if (!plane->load(TEXTURE_FILE_TREE)) {
@@ -304,21 +304,21 @@ namespace {
 
 std::shared_ptr<world::world_base> world_initialize(const int screen_width, const int screen_height) {
     // キャラクター モデル
-    std::shared_ptr<mv1::player> player(new mv1::player());
+    auto player = std::make_shared<mv1::player>();
 
     if (!player_initialize(player)) {
         return nullptr;
     }
 
     // 地面
-    std::shared_ptr<primitive::plane> plane(new primitive::plane(PLANE_SIZE, PLANE_DIVISION_NUM));
+    auto plane = std::make_shared<primitive::plane>(PLANE_SIZE, PLANE_DIVISION_NUM);
 
     if (!plane_initialize(plane)) {
         return nullptr;
     }
 
     // 地球
-    std::shared_ptr<primitive::sphere> sphere(new primitive::sphere(SPHERE_RADIUS, SPHERE_DIVISION_NUM));
+    auto sphere = std::make_shared<primitive::sphere>(SPHERE_RADIUS, SPHERE_DIVISION_NUM);
 
     if (!sphere_initialize(sphere)) {
         return nullptr;
@@ -332,7 +332,7 @@ std::shared_ptr<world::world_base> world_initialize(const int screen_width, cons
     // カメラ
     camera = camera_initialize(screen_width, screen_height, player);
 
-    if (camera == nullptr) {
+    if (!camera.has_value()) {
         return nullptr;
     }
 
@@ -342,10 +342,10 @@ std::shared_ptr<world::world_base> world_initialize(const int screen_width, cons
     }
 
     // 世界
-    std::shared_ptr<world::world_base> world(new world::world_base());
+    auto world = std::make_shared<world::world_base>();
 
     // 世界へ登録とキャラクターのコリジョン登録
-    world->add_camera(camera);
+    world->add_camera(*camera);
     world->add_model(player);
     world->add_primitive(plane);
     world->add_primitive(sphere);
@@ -363,7 +363,7 @@ std::shared_ptr<world::world_base> world_initialize(const int screen_width, cons
 
     // 銃 モデルをキャラクターモデルに持たせる
 #if false
-    std::shared_ptr<mv1::gun> gun(new mv1::gun());
+    auto gun = std::make_shared<mv1::gun>();
 
     if (gun_initialize(gun, player)) {
         world->add_model(gun);
@@ -372,8 +372,8 @@ std::shared_ptr<world::world_base> world_initialize(const int screen_width, cons
 
     // ミサイルの処理を追加する
 #if false
-    std::shared_ptr<mv1::missile> missile(new mv1::missile(screen_width, screen_height));
-    std::shared_ptr<primitive::sphere> explosion(new primitive::sphere(EXPLOSION_RADIUS, EXPLOSION_DIVISION_NUM));
+    auto missile = std::make_shared<mv1::missile>(screen_width, screen_height);
+    auto explosion = std::make_shared<primitive::sphere>(EXPLOSION_RADIUS, EXPLOSION_DIVISION_NUM);
 
     if (missile_initialize(screen_width, screen_height, missile, world, player, explosion)) {
         world->add_primitive(explosion);

@@ -158,18 +158,19 @@ namespace mv1 {
 
         // ジャンプ中なら上に乗るかチェック
         if (is_jump) {
-            auto info = plane->get_info();
+            // C++17 構造化束縛
+            auto [vertices, normal] = plane->get_info();
 
-            if (process_jump_landing(position, std::get<0>(info))) {
+            if (process_jump_landing(position, vertices)) {
                 process_jump_finished(primitive);
             }
         }
         else {
             // 上に乗っていたら落下チェック
             if (collision_ride_on != nullptr && collision_ride_on == primitive) {
-                auto info = plane->get_info();
+                auto [vertices, normal] = plane->get_info();
 
-                check_fall(std::get<0>(info));
+                check_fall(vertices);
             }
         }
 
@@ -206,18 +207,18 @@ namespace mv1 {
 
         if (is_jump) {
             // ジャンプ中なら上に乗るかチェック
-            auto face_top = cube->get_face(primitive::cube::face_type::top);
+            auto [vertices, normal] = cube->get_face(primitive::cube::face_type::top);
 
-            if (process_jump_landing(position, std::get<0>(face_top))) {
+            if (process_jump_landing(position, vertices)) {
                 process_jump_finished(primitive);
             }
         }
         else {
             // 上に乗っていたら落下チェック
             if (collision_ride_on != nullptr && collision_ride_on == primitive) {
-                auto face_top = cube->get_face(primitive::cube::face_type::top);
+                auto [vertices, normal] = cube->get_face(primitive::cube::face_type::top);
 
-                if (check_fall(std::get<0>(face_top))) {
+                if (check_fall(vertices)) {
                     is_jump = true;
                     is_fall = true;
                     process_jump_initialize(jump_type::fall);
@@ -228,11 +229,10 @@ namespace mv1 {
         // 落下中でなければ
         if (!is_fall) {
             // 側面とのコリジョン処理
-            auto collision_line = make_collision_line();
+            auto [start, end] = make_collision_line();
 
-            for (auto iterator = cube_side.begin(); iterator != cube_side.end(); ++iterator) {
-                auto face = cube->get_face(*iterator);
-                auto normal = std::get<1>(face);
+            for (const auto& side : cube_side) {
+                auto [vertices, normal] = cube->get_face(side);
 
                 // 面の法線と向きのベクトルで内積を行い外向きの時だけ判定
 #if defined(_AMG_MATH)
@@ -242,18 +242,15 @@ namespace mv1 {
 #endif
                 // バックジャンプ時は除外
                 if (is_back || dot <= 0.0) {
-                    auto vertices = std::get<0>(face);
-                    auto collision = math::utility::collision_polygon_line(vertices[0], vertices[1], vertices[2], vertices[3], std::get<0>(collision_line), std::get<1>(collision_line));
+                    auto [is_collision, collision_point] = math::utility::collision_polygon_line(vertices[0], vertices[1], vertices[2], vertices[3], start, end);
 
-                    if (std::get<0>(collision)) {
-                        set_collision_to_position(std::get<1>(collision));
+                    if (is_collision) {
+                        set_collision_to_position(collision_point);
 
                         if (is_jump) {
                             jump_velocity_initialize_reflect();
                         }
                         else if (is_forward) {
-                            auto normal = std::get<1>(face);
-
                             process_press_forward(normal);
                         }
                         // 他の側面との判定は不要

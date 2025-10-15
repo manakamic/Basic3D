@@ -68,13 +68,16 @@ namespace primitive {
                     vertex->emplace_back(std::move(v));
                 }
 
-                index->push_back(offset_index);
-                index->push_back(offset_index + 1);
-                index->push_back(offset_index + 2);
-
-                index->push_back(offset_index + 2);
-                index->push_back(offset_index + 1);
-                index->push_back(offset_index + 3);
+                // std::initializer_list 
+                index->insert(index->end(), {
+                    static_cast<unsigned short>(offset_index),
+                    static_cast<unsigned short>(offset_index + 1),
+                    static_cast<unsigned short>(offset_index + 2),
+                    // 2‚Â–Ú‚ÌŽOŠpŒ`
+                    static_cast<unsigned short>(offset_index + 2),
+                    static_cast<unsigned short>(offset_index + 1),
+                    static_cast<unsigned short>(offset_index + 3)
+                });
 
                 offset_index += 4;
 

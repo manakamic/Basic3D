@@ -22,7 +22,8 @@ namespace mv1 {
          // デストラクタ
         virtual ~model_base();
 
-        virtual bool load(const TCHAR* fileName);
+        // C++17 戻り値を無視した場合に警告を出す
+        [[nodiscard]] virtual bool load(const TCHAR* fileName);
         virtual bool unload();
 
         virtual void process();

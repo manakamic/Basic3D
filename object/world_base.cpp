@@ -33,11 +33,11 @@ namespace world {
     void world_base::process() {
         process_camera();
 
-        for (auto primitive : primitive_list) {
+        for (const auto& primitive : primitive_list) {
             primitive->process();
         }
 
-        for (auto model : model_list) {
+        for (const auto& model : model_list) {
             model->process();
         }
     }

@@ -175,12 +175,12 @@ namespace {
     }
 }
 
-std::shared_ptr<world::camera_base> camera_initialize(const int screen_width, const int screen_height, const std::shared_ptr<mv1::player>& player) {
+std::optional<std::shared_ptr<world::camera_base>> camera_initialize(const int screen_width, const int screen_height, const std::shared_ptr<mv1::player>& player) {
     // ƒJƒƒ‰
-    std::shared_ptr<world::camera_base> camera(new world::camera_base(screen_width, screen_height));
+    auto camera = std::make_shared<world::camera_base>(screen_width, screen_height);
 
     if (!camera_initialize(camera, player)) {
-        return nullptr;
+        return std::nullopt;
     }
 
     return camera;

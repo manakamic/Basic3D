@@ -20,8 +20,8 @@ namespace primitive {
         lighting = TRUE;
         transparent = FALSE;
 
-        vertex.reset(new std::vector<VERTEX3D>());
-        index.reset(new std::vector<unsigned short>());
+        vertex = std::make_unique<std::vector<VERTEX3D>>();
+        index = std::make_unique<std::vector<unsigned short>>();
 
         invisible = false;
         is_debug = false;
@@ -101,11 +101,9 @@ namespace primitive {
             MATRIX rotate_dx = rotate_matrix;
 #endif
 
-            for (auto iterator = vertex->begin(); iterator != vertex->end(); ++iterator) {
-                VERTEX3D v = *iterator;
+            for (const auto& v : *vertex) {
                 VECTOR position = VTransform(v.pos, posture_dx);
                 VECTOR normal = VTransform(v.norm, rotate_dx);
-
                 DrawLine3D(position, VAdd(position, VScale(normal, DEBUG_NORMAL_SCALE)), debug_normal_color);
             }
         }
