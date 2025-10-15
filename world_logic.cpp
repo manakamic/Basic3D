@@ -282,7 +282,7 @@ namespace {
 
                 base->set_posture_matrix(posture);
 #else
-                MATRIX billboard = camera->get_billboard_matrix();
+                MATRIX billboard = (*camera)->get_billboard_matrix();
                 MATRIX scale = base->get_scale_matrix();
                 MATRIX rotate = base->get_rotate_matrix();
                 MATRIX transfer = base->get_transfer_matrix();
