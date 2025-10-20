@@ -70,7 +70,7 @@ jobs:
       # アップロード用に現在の日付を環境変数に設定
       - name: Set current date as env
         if: github.event.inputs.build_type == 'Release'
-        run: echo "TIMESTAMP=$(Get-Date -Format 'yyyy-MM-dd-HH-mm')" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        run: echo "TIMESTAMP=$(Get-Date -Format 'yyyy-MM-dd')" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         shell: pwsh
 
       # GitHub Releases にアップロード
