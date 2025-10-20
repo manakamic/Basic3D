@@ -22,6 +22,8 @@ jobs:
       # リポジトリのソースコードをチェックアウト
       - name: Checkout Main Repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       # DXライブラリのリポジトリをチェックアウトして 'dxlib' フォルダに配置
       - name: Checkout DxLib Repository
