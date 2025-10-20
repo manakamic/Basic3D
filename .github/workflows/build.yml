@@ -67,14 +67,20 @@ jobs:
           Copy-Item -Path "texture" -Destination $env:PACKAGE_DIR -Recurse
           Compress-Archive -Path "$env:PACKAGE_DIR/*" -Destination "${{ github.event.repository.name }}-release.zip"
 
+      # アップロード用に現在の日付を環境変数に設定
+      - name: Set current date as env
+        if: github.event.inputs.build_type == 'Release'
+        run: echo "TIMESTAMP=$(Get-Date -Format 'yyyy-MM-dd-HH-mm')" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        shell: pwsh
+
       # GitHub Releases にアップロード
       - name: Create Release
         if: github.event.inputs.build_type == 'Release'
         uses: softprops/action-gh-release@v2
         with:
           files: "${{ github.event.repository.name }}-release.zip"
-          tag_name: "release-${{ github.run_id }}-${{ github.run_attempt }}"
-          name: "Release ${{ github.run_id }}"
+          tag_name: "release-${{ env.TIMESTAMP }}-${{ github.run_attempt }}"
+          name: "Release ${{ env.TIMESTAMP }}"
           body: "Automated release created by GitHub Actions."
           draft: false
           prerelease: false
