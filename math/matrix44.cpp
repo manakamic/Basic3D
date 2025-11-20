@@ -88,9 +88,9 @@ namespace math {
     void matrix44::look_at(const vector4& position, const vector4& target, const vector4& up) {
         auto axis_z = target - position;
         axis_z.normalized();
-        auto axis_x = axis_z.cross(up);
+        auto axis_x = up.cross(axis_z);
         axis_x.normalized();
-        auto axis_y = axis_x.cross(axis_z);
+        auto axis_y = axis_z.cross(axis_x);
         axis_y.normalized();
 
         row_column[0][0] = axis_x.get_x();
