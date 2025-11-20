@@ -164,7 +164,7 @@ math::matrix44 GetCameraProjectionMatrix(double cameraNear, double cameraFar, do
     //SetupCamera_Perspective(fov);
     //MATRIX projection_matrix = GetCameraProjectionMatrix();
     // Å™ è„ãLÇ∆ìØÇ∂ MATRIX ÇÃì‡óeÇåvéZÇ∑ÇÈ
-    auto aspect = static_cast<float>(SCREEN_HEIGHT) / static_cast<float>(SCREEN_WIDTH);
+    auto aspect = static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT);
     math::matrix44 projection_matrix = math::matrix44();
 
     projection_matrix.perspective(fov, aspect, cameraNear, cameraFar);

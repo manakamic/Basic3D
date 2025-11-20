@@ -147,7 +147,7 @@ MATRIX GetCameraProjectionMatrix(float cameraNear, float cameraFar, float fov) {
     //SetupCamera_Perspective(fov);
     //MATRIX projection_matrix = GetCameraProjectionMatrix();
     // ª ã‹L‚Æ“¯‚¶ MATRIX ‚Ì“à—e‚ğŒvZ‚·‚é
-    auto aspect = static_cast<float>(SCREEN_HEIGHT) / static_cast<float>(SCREEN_WIDTH);
+    auto aspect = static_cast<float>(SCREEN_WIDTH)/ static_cast<float>(SCREEN_HEIGHT);
     auto range = cameraFar - cameraNear;
     auto temp = cameraFar / range;
     auto cot = 1.0f / std::tan(fov * 0.5f);
