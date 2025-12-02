@@ -155,7 +155,7 @@ MATRIX GetCameraProjectionMatrix(float cameraNear, float cameraFar, float fov) {
     // 0 行列の取得がないので 0 スケールで対応する
     MATRIX projection_matrix = MScale(MGetIdent(), 0.0f);
 
-    projection_matrix.m[0][0] = cot * aspect;
+    projection_matrix.m[0][0] = cot / aspect;
     projection_matrix.m[1][1] = cot;
     projection_matrix.m[2][2] = temp;
     projection_matrix.m[2][3] = 1.0f;
