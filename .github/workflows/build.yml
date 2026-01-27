@@ -42,18 +42,21 @@ jobs:
         run: msbuild Basic3D.sln /p:Configuration=${{ github.event.inputs.build_type }} /p:Platform=x64
 
       # Debugビルドの場合
+      - name: Copy Debug EXE to Root
+        if: github.event.inputs.build_type == 'Debug'
+        run: Copy-Item -Path "x64/Debug/Basic3D.exe" -Destination "."
+
       - name: Upload Debug Artifact
         if: github.event.inputs.build_type == 'Debug'
         uses: actions/upload-artifact@v4
         with:
           name: debug-build-${{ github.run_id }}
           path: |
-            x64/Debug/Basic3D.exe
+            Basic3D.exe
             model
             model_original
             shader
             texture
-
 
       # Releaseビルドの場合
       - name: Package Release Build
