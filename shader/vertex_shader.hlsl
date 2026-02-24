@@ -52,71 +52,24 @@ cbuffer cbD3D11_CONST_BUFFER_VS_OTHERMATRIX : register(b2) {
 };
 // ===================================================================================================================
 
-// float3 -> float4
-float4 Convert34(float3 v) {
-	float4 vec;
-
-	vec.xyz = v;
-	vec.w = 1.0f;
-
-	return vec;
-}
-
-// float4 x float4[3]
-float4 Multiply43(float4 v, float4 m0, float4 m1, float4 m2) {
-	float4 vec;
-
-	vec.x = dot(v, m0);
-    vec.y = dot(v, m1);
-    vec.z = dot(v, m2);
-    vec.w = 1.0f;
-
-	return vec;
-}
-
-// float4 x float4[4]
-float4 Multiply44(float4 v, float4 m0, float4 m1, float4 m2, float4 m3) {
-	float4 vec;
-
-	vec.x = dot(v, m0);
-    vec.y = dot(v, m1);
-    vec.z = dot(v, m2);
-    vec.w = dot(v, m3);
-
-	return vec;
-}
-
-// float3 x float3[3]
-float3 Multiply33(float3 v, float3 m0, float3 m1, float3 m2) {
-	float3 vec;
-
-	vec.x = dot(v, m0);
-    vec.y = dot(v, m1);
-    vec.z = dot(v, m2);
-
-	return vec;
-}
-
 // main関数
 VS_OUTPUT main(VS_INPUT VSInput) {
 	// モデルの頂点をビュー変換させる
-    float4 lLocalPosition = Convert34(VSInput.pos);
-	float4 lWorldPosition = Multiply43(lLocalPosition, g_Base.LocalWorldMatrix[0], g_Base.LocalWorldMatrix[1], g_Base.LocalWorldMatrix[2]);
-	float4 lViewPosition = Multiply43(lWorldPosition, g_Base.ViewMatrix[0], g_Base.ViewMatrix[1], g_Base.ViewMatrix[2]);
+	float3x4 lwMat34 = float3x4(g_Base.LocalWorldMatrix[0], g_Base.LocalWorldMatrix[1], g_Base.LocalWorldMatrix[2]);
+	float4 lWorldPosition = float4(mul(lwMat34, float4(VSInput.pos, 1.0f)), 1.0f);
+	float3x4 vMat34 = float3x4(g_Base.ViewMatrix[0], g_Base.ViewMatrix[1], g_Base.ViewMatrix[2]);
+	float4 lViewPosition = float4(mul(vMat34, lWorldPosition), 1.0f);
+	
 	// モデルの法線と接線と従法線をビュー空間へ変換する(従法線は法線と接線から外積で作る)
-	float3 lwMat0 = g_Base.LocalWorldMatrix[0].xyz;
-	float3 lwMat1 = g_Base.LocalWorldMatrix[1].xyz;
-	float3 lwMat2 = g_Base.LocalWorldMatrix[2].xyz;
-	float3 lWorldTan = Multiply33(VSInput.tan, lwMat0, lwMat1, lwMat2);
-	float3 binorm = cross(VSInput.norm, VSInput.tan);
-	float3 lWorldBin = Multiply33(binorm, lwMat0, lwMat1, lwMat2);
-	float3 lWorldNrm = Multiply33(VSInput.norm, lwMat0, lwMat1, lwMat2);
-	float3 vMat0 = g_Base.ViewMatrix[0].xyz;
-	float3 vMat1 = g_Base.ViewMatrix[1].xyz;
-	float3 vMat2 = g_Base.ViewMatrix[2].xyz;
-	float3 lViewTan = Multiply33(lWorldTan, vMat0, vMat1, vMat2);
-	float3 lViewBin = Multiply33(lWorldBin, vMat0, vMat1, vMat2);
-	float3 lViewNrm = Multiply33(lWorldNrm, vMat0, vMat1, vMat2);
+	float3 binorm = normalize(cross(VSInput.norm, VSInput.tan));
+	// ワールド空間へ変換
+	float3 lWorldTan = mul(lwMat34, float4(VSInput.tan, 0.0f));
+	float3 lWorldBin = mul(lwMat34, float4(binorm, 0.0f));
+	float3 lWorldNrm = mul(lwMat34, float4(VSInput.norm, 0.0f));
+	// ビュー空間へ変換
+	float3 lViewTan = mul(vMat34, float4(lWorldTan, 0.0f));
+	float3 lViewBin = mul(vMat34, float4(lWorldBin, 0.0f));
+	float3 lViewNrm = mul(vMat34, float4(lWorldNrm, 0.0f));
 
 	VS_OUTPUT VSOutput;
 
@@ -128,7 +81,8 @@ VS_OUTPUT main(VS_INPUT VSInput) {
 	VSOutput.binorm = lViewBin;
 	VSOutput.norm = lViewNrm;
 	// ビュー空間の座標に透視変換を適応
-	VSOutput.pos = Multiply44(lViewPosition, g_Base.ProjectionMatrix[0], g_Base.ProjectionMatrix[1], g_Base.ProjectionMatrix[2], g_Base.ProjectionMatrix[3]);
+	float4x4 projMat = float4x4(g_Base.ProjectionMatrix[0], g_Base.ProjectionMatrix[1], g_Base.ProjectionMatrix[2], g_Base.ProjectionMatrix[3]);
+	VSOutput.pos = mul(projMat, lViewPosition);
 
     return VSOutput;
 }

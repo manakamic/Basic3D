@@ -97,17 +97,7 @@ Texture2D    g_NormalMapTexture : register(t1);   // ノーマルマップテク
 SamplerState g_SpecularMapSampler : register(s2); // スぺキュラマップサンプラ
 Texture2D    g_SpecularMapTexture : register(t2); // スぺキュラマップテクスチャ
 
-// float3 x float3[3]
-float3 Multiply33(float3 v, float3 m0, float3 m1, float3 m2) {
-	float3 vec;
-
-	vec.x = dot(v, m0);
-    vec.y = dot(v, m1);
-    vec.z = dot(v, m2);
-
-	return vec;
-}
-
+// main関数
 PS_OUTPUT main(PS_INPUT PSInput) {
 	float4 Diffuse = g_DiffuseMapTexture.Sample(g_DiffuseMapSampler, PSInput.texCoords0);
 	float4 Specular = g_SpecularMapTexture.Sample(g_SpecularMapSampler, PSInput.texCoords0);
@@ -117,19 +107,22 @@ PS_OUTPUT main(PS_INPUT PSInput) {
     float3 norm = normalize(PSInput.norm);
 	float3 tan = normalize(PSInput.tan);
 	float3 binorm = normalize(PSInput.binorm);
+	float3x3 mat33 = float3x3(tan, binorm, norm);
 	float3 ViewLight = g_Common.Light[0].Direction;
-	float3 TangentLight = Multiply33(ViewLight, tan, binorm, norm);
-    float DiffisePower = saturate(dot(Normal, -TangentLight));
-	float3 DiffiseColor = (g_Common.Light[0].Diffuse * g_Common.Material.Diffuse.xyz * DiffisePower) + g_Common.Light[0].Ambient.xyz + g_Common.Material.Ambient_Emissive.xyz;
+	float3 TangentLight = normalize(mul(mat33, ViewLight));
+	// 説空間でのライト
+	float DiffusePower = saturate(dot(Normal, -TangentLight));
+	// Ambien と Emissive は加算
+	float3 BaseLightColor = (g_Common.Light[0].Diffuse * g_Common.Material.Diffuse.xyz * DiffusePower) + g_Common.Light[0].Ambient.xyz + g_Common.Material.Ambient_Emissive.xyz;
 	// ハーフベクトルでスぺキュラの処理を行う
-	float3 V_to_Eye = Multiply33(-PSInput.viewPos, tan, binorm, norm);
+	float3 V_to_Eye = normalize(mul(mat33, -PSInput.viewPos));
 	float3 HalfVector = normalize(normalize(V_to_Eye) - TangentLight);
 	float SpecularPower = pow(max(0.0f, dot(Normal, HalfVector)), g_Common.Material.Power);
 	float3 SpecularColor = g_Common.Material.Specular.xyz * SpecularPower;
 	
     PS_OUTPUT PSOutput;
 
-	PSOutput.color0.rgb = (Diffuse.rgb * DiffiseColor) + (Specular.rgb * SpecularColor);
+	PSOutput.color0.rgb = (Diffuse.rgb * BaseLightColor) + (Specular.rgb * SpecularColor);
 	PSOutput.color0.a = Diffuse.a * g_Common.Material.Diffuse.a * g_Base.FactorColor.a;
 
 	return PSOutput;
